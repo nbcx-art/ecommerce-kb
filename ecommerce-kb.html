@@ -2239,66 +2239,129 @@
     }
     .login-change-btn:hover { color: var(--dark); background: var(--bg-soft); }
 
-    /* === Consumer Role-Play === */
-    .consumer-rp {
+    /* === CS Exam === */
+    .cs-exam {
       margin-top: 2rem;
       background: linear-gradient(135deg, rgba(99,102,241,0.04), rgba(236,72,153,0.04));
       border: 1px solid rgba(99,102,241,0.15);
       border-radius: 16px;
       padding: 1.5rem;
     }
-    .consumer-rp-head { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.5rem; }
-    .consumer-rp-head .crp-icon {
+    .cs-exam-head { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.5rem; }
+    .cs-exam-head .exam-icon {
       width: 40px; height: 40px; border-radius: 10px;
       display: flex; align-items: center; justify-content: center;
       background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(236,72,153,0.12));
     }
-    .consumer-rp-head .crp-icon svg { width: 20px; height: 20px; color: #6366f1; }
-    .consumer-rp-head h4 { font-size: 1.05rem; font-weight: 700; color: var(--dark); }
-    .consumer-rp-head p { font-size: 0.8rem; color: var(--muted); margin-top: 0.15rem; }
-    .consumer-rp-input-area { margin-top: 1rem; }
-    .consumer-rp-input-area textarea {
-      width: 100%; min-height: 80px; padding: 0.8rem 1rem;
-      border: 1.5px solid var(--border); border-radius: 10px;
-      font-size: 0.9rem; font-family: var(--font); resize: vertical;
-      transition: border-color 0.2s; box-sizing: border-box;
+    .cs-exam-head .exam-icon svg { width: 20px; height: 20px; color: #6366f1; }
+    .cs-exam-head h4 { font-size: 1.05rem; font-weight: 700; color: var(--dark); }
+    .cs-exam-head p { font-size: 0.8rem; color: var(--muted); margin-top: 0.15rem; }
+    .exam-start-panel { text-align: center; padding: 2rem 1rem; }
+    .exam-start-panel .exam-info {
+      display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap;
+      margin: 1.5rem 0;
     }
-    .consumer-rp-input-area textarea:focus { outline: none; border-color: var(--primary); }
-    .consumer-rp-actions { display: flex; gap: 0.5rem; margin-top: 0.8rem; flex-wrap: wrap; }
-    .consumer-rp-results { margin-top: 1rem; display: flex; flex-direction: column; gap: 0.8rem; }
-    .crp-result-card {
+    .exam-stat {
+      text-align: center; padding: 0.8rem 1.2rem;
+      background: #fff; border-radius: 10px; border: 1px solid var(--border);
+      min-width: 80px;
+    }
+    .exam-stat .num { font-size: 1.4rem; font-weight: 700; color: #6366f1; }
+    .exam-stat .label { font-size: 0.72rem; color: var(--muted); margin-top: 0.2rem; }
+    .exam-progress-bar {
+      height: 6px; background: rgba(99,102,241,0.1); border-radius: 100px;
+      overflow: hidden; margin-bottom: 1.2rem;
+    }
+    .exam-progress-bar-fill {
+      height: 100%; background: linear-gradient(90deg, #6366f1, #ec4899);
+      border-radius: 100px; transition: width 0.4s ease;
+    }
+    .exam-question-card {
       background: #fff; border: 1px solid var(--border); border-radius: 12px;
-      padding: 1rem 1.2rem; transition: border-color 0.2s;
+      padding: 1.2rem 1.4rem; margin-bottom: 1rem;
     }
-    .crp-result-card:hover { border-color: var(--primary); }
-    .crp-result-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.5rem; }
-    .crp-result-tag {
-      display: inline-flex; align-items: center; gap: 0.3rem;
-      padding: 0.2rem 0.6rem; border-radius: 100px;
-      font-size: 0.72rem; font-weight: 600;
+    .exam-q-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.8rem; }
+    .exam-q-num {
+      width: 28px; height: 28px; border-radius: 8px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: #fff; font-size: 0.8rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
     }
-    .crp-result-copy {
-      background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.15);
-      color: #6366f1; padding: 0.3rem 0.7rem; border-radius: 8px;
-      font-size: 0.76rem; font-weight: 600; cursor: pointer; font-family: var(--font);
-      display: flex; align-items: center; gap: 0.3rem; transition: all 0.2s;
+    .exam-q-type {
+      font-size: 0.7rem; font-weight: 600; padding: 0.15rem 0.5rem;
+      border-radius: 100px; flex-shrink: 0;
     }
-    .crp-result-copy:hover { background: rgba(99,102,241,0.15); }
-    .crp-result-copy svg { width: 13px; height: 13px; }
-    .crp-result-body {
-      font-size: 0.88rem; line-height: 1.6; color: var(--dark);
-      background: var(--bg-soft); border-radius: 8px; padding: 0.8rem 1rem;
-      white-space: pre-wrap; word-break: break-word;
+    .exam-q-type.single { background: rgba(99,102,241,0.1); color: #6366f1; }
+    .exam-q-type.multi { background: rgba(236,72,153,0.1); color: #ec4899; }
+    .exam-q-source { font-size: 0.7rem; color: var(--muted); margin-left: auto; }
+    .exam-q-text { font-size: 0.95rem; font-weight: 600; color: var(--dark); line-height: 1.5; margin-bottom: 0.8rem; }
+    .exam-options { display: flex; flex-direction: column; gap: 0.5rem; }
+    .exam-option {
+      display: flex; align-items: flex-start; gap: 0.6rem;
+      padding: 0.7rem 1rem; border: 1.5px solid var(--border); border-radius: 10px;
+      cursor: pointer; transition: all 0.2s; font-size: 0.88rem; line-height: 1.5;
+      color: var(--dark); background: #fff;
     }
-    .crp-result-source {
-      font-size: 0.74rem; color: var(--muted); margin-top: 0.5rem;
-      display: flex; align-items: center; gap: 0.3rem;
+    .exam-option:hover { border-color: rgba(99,102,241,0.4); background: rgba(99,102,241,0.02); }
+    .exam-option.selected { border-color: #6366f1; background: rgba(99,102,241,0.06); }
+    .exam-option.correct { border-color: #22c55e; background: rgba(34,197,94,0.08); }
+    .exam-option.wrong { border-color: #ef4444; background: rgba(239,68,68,0.08); }
+    .exam-option .opt-label {
+      width: 24px; height: 24px; border-radius: 6px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 700; background: var(--bg-soft); color: var(--muted);
+      transition: all 0.2s;
     }
-    .crp-empty {
+    .exam-option.selected .opt-label { background: #6366f1; color: #fff; }
+    .exam-option.correct .opt-label { background: #22c55e; color: #fff; }
+    .exam-option.wrong .opt-label { background: #ef4444; color: #fff; }
+    .exam-option .opt-text { flex: 1; word-break: break-word; }
+    .exam-option .opt-icon { margin-left: auto; flex-shrink: 0; }
+    .exam-option .opt-icon svg { width: 18px; height: 18px; }
+    .exam-option.correct .opt-icon .check { color: #22c55e; }
+    .exam-option.wrong .opt-icon .cross { color: #ef4444; }
+    .exam-actions { display: flex; gap: 0.5rem; margin-top: 0.8rem; flex-wrap: wrap; }
+    .exam-result-summary {
+      background: #fff; border-radius: 12px; padding: 1.5rem; text-align: center;
+      margin-bottom: 1rem; border: 1px solid var(--border);
+    }
+    .exam-score-circle {
+      width: 100px; height: 100px; border-radius: 50%;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      margin: 0 auto 1rem; border: 4px solid;
+      font-weight: 700;
+    }
+    .exam-score-circle.pass { border-color: #22c55e; color: #22c55e; }
+    .exam-score-circle.fail { border-color: #ef4444; color: #ef4444; }
+    .exam-score-circle .score-num { font-size: 1.8rem; }
+    .exam-score-circle .score-label { font-size: 0.7rem; }
+    .exam-result-stats {
+      display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap; margin-top: 0.8rem;
+    }
+    .exam-result-stat { text-align: center; }
+    .exam-result-stat .val { font-size: 1.1rem; font-weight: 700; }
+    .exam-result-stat .lbl { font-size: 0.72rem; color: var(--muted); }
+    .exam-empty {
       text-align: center; padding: 2rem 1rem; color: var(--muted);
       font-size: 0.88rem;
     }
-    .crp-empty svg { width: 32px; height: 32px; opacity: 0.3; margin-bottom: 0.5rem; display: block; margin: 0 auto 0.5rem; }
+    .exam-empty svg { width: 32px; height: 32px; opacity: 0.3; margin-bottom: 0.5rem; display: block; margin: 0 auto 0.5rem; }
+    .exam-review-card {
+      background: #fff; border: 1px solid var(--border); border-radius: 12px;
+      padding: 1rem 1.2rem; margin-bottom: 0.8rem;
+    }
+    .exam-review-card.correct { border-left: 4px solid #22c55e; }
+    .exam-review-card.wrong { border-left: 4px solid #ef4444; }
+    .exam-review-q { font-size: 0.88rem; font-weight: 600; color: var(--dark); margin-bottom: 0.5rem; }
+    .exam-review-ans { font-size: 0.82rem; line-height: 1.6; color: var(--muted); }
+    .exam-review-ans .tag { font-weight: 600; }
+    .exam-review-ans .tag.right { color: #22c55e; }
+    .exam-review-ans .tag.wrong { color: #ef4444; }
+    .exam-review-explanation {
+      margin-top: 0.5rem; padding: 0.5rem 0.8rem; background: var(--bg-soft);
+      border-radius: 8px; font-size: 0.8rem; color: var(--dark); line-height: 1.5;
+    }
   </style>
 </head>
 <body>
@@ -3403,30 +3466,29 @@ flowchart LR
 
         <div id="simSummaryArea"></div>
 
-        <!-- Consumer Role-Play -->
-        <div class="consumer-rp">
-          <div class="consumer-rp-head">
-            <div class="crp-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <!-- CS Exam -->
+        <div class="cs-exam">
+          <div class="cs-exam-head">
+            <div class="exam-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/><line x1="12" y1="12" x2="12" y2="18"/></svg>
             </div>
             <div>
-              <h4>消费者问题 → 推荐话术</h4>
-              <p>粘贴消费者的问题，系统自动从知识库中匹配相关内容并生成推荐回复</p>
+              <h4>客服知识考试</h4>
+              <p>系统自动从知识库中生成单选题和多选题，检验客服知识掌握程度</p>
             </div>
           </div>
-          <div class="consumer-rp-input-area">
-            <textarea id="consumerQuestionInput" placeholder="粘贴消费者的问题，例如：你好，我买的手机收到发现有划痕，想退货怎么操作？"></textarea>
-            <div class="consumer-rp-actions">
-              <button class="btn-primary" id="crpGenerateBtn" style="padding:0.6rem 1.4rem">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;margin-right:0.3rem;vertical-align:middle"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>生成推荐话术
+          <div id="examContainer">
+            <div class="exam-start-panel" id="examStartPanel">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:48px;height:48px;color:#6366f1;margin:0 auto 1rem;display:block"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 13l2 2 4-4"/></svg>
+              <p style="font-size:0.9rem;color:var(--muted);max-width:400px;margin:0 auto 1rem">点击下方按钮开始考试，系统将从知识管理、常见问题、退换货政策、物流配送、支付方式、售后服务中随机生成题目</p>
+              <div class="exam-info">
+                <div class="exam-stat"><div class="num" id="examPoolCount">-</div><div class="label">知识条目</div></div>
+                <div class="exam-stat"><div class="num">10</div><div class="label">考试题数</div></div>
+                <div class="exam-stat"><div class="num">60</div><div class="label">合格分数</div></div>
+              </div>
+              <button class="btn-primary" id="examStartBtn" style="padding:0.7rem 2rem;font-size:0.9rem">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;margin-right:0.3rem;vertical-align:middle"><polygon points="5 3 19 12 5 21 5 3"/></svg>开始考试
               </button>
-              <button class="btn-outline" id="crpClearBtn" style="padding:0.6rem 1.4rem">清空</button>
-            </div>
-          </div>
-          <div class="consumer-rp-results" id="crpResults">
-            <div class="crp-empty">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-              粘贴消费者问题后点击"生成推荐话术"，系统将从知识库中匹配相关内容
             </div>
           </div>
         </div>
