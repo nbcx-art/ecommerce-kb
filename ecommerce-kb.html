@@ -3461,13 +3461,24 @@ flowchart LR
           <div id="examContainer">
             <div class="exam-start-panel" id="examStartPanel">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:48px;height:48px;color:#6366f1;margin:0 auto 1rem;display:block"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 13l2 2 4-4"/></svg>
-              <p style="font-size:0.9rem;color:var(--muted);max-width:400px;margin:0 auto 1rem">点击下方按钮开始考试，系统将从知识管理、常见问题、退换货政策、物流配送、支付方式、售后服务中随机生成题目</p>
+              <p style="font-size:0.9rem;color:var(--muted);max-width:400px;margin:0 auto 1rem">系统将从知识管理、常见问题、退换货政策、物流配送、支付方式、售后服务中随机生成15道选择题</p>
               <div class="exam-info">
                 <div class="exam-stat"><div class="num" id="examPoolCount">-</div><div class="label">知识条目</div></div>
-                <div class="exam-stat"><div class="num">10</div><div class="label">考试题数</div></div>
+                <div class="exam-stat"><div class="num">15</div><div class="label">考试题数</div></div>
                 <div class="exam-stat"><div class="num">60</div><div class="label">合格分数</div></div>
               </div>
-              <button class="btn-primary" id="examStartBtn" style="padding:0.7rem 2rem;font-size:0.9rem">
+              <div style="max-width:360px;margin:1.2rem auto 0;display:flex;flex-direction:column;gap:0.8rem">
+                <div style="text-align:left">
+                  <label style="font-size:0.82rem;font-weight:600;color:var(--dark);display:block;margin-bottom:0.3rem">考生姓名 <span style="color:#ef4444">*</span></label>
+                  <input type="text" id="examNameInput" placeholder="请输入姓名" style="width:100%;padding:0.6rem 0.8rem;border:1.5px solid var(--border);border-radius:8px;font-size:0.88rem;font-family:var(--font);box-sizing:border-box;transition:border-color 0.2s" />
+                  <p id="examNameHint" style="display:none;color:#ef4444;font-size:0.74rem;margin-top:0.3rem">请填写姓名后才能开始考试</p>
+                </div>
+                <div style="text-align:left">
+                  <label style="font-size:0.82rem;font-weight:600;color:var(--dark);display:block;margin-bottom:0.3rem">考试日期 <span style="color:#ef4444">*</span></label>
+                  <input type="date" id="examDateInput" style="width:100%;padding:0.6rem 0.8rem;border:1.5px solid var(--border);border-radius:8px;font-size:0.88rem;font-family:var(--font);box-sizing:border-box;transition:border-color 0.2s" />
+                </div>
+              </div>
+              <button class="btn-primary" id="examStartBtn" style="padding:0.7rem 2rem;font-size:0.9rem;margin-top:1.2rem">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;margin-right:0.3rem;vertical-align:middle"><polygon points="5 3 19 12 5 21 5 3"/></svg>开始考试
               </button>
             </div>
