@@ -1469,446 +1469,8 @@
   if (errorExportBtn) errorExportBtn.addEventListener('click', exportErrorData);
 
   // ============================================================
-  // 11. Dialogue Simulation
+  // 11. Update sections list for scroll spy
   // ============================================================
-  var scenarios = {
-    return: {
-      name: '退货客户 小王', avatar: '王',
-      rounds: [
-        {
-          customer: '你好，我三天前在你们这买的衣服不太合适，想退货，能退吗？',
-          keyPoints: ['7天', '无理由', '退货', '原包装', '吊牌'],
-          politePhrases: ['您好', '请问', '帮', '抱歉', '感谢'],
-          minLength: 15,
-          followUps: {
-            good: '好的，吊牌和包装都还在呢，那我怎么申请退货？',
-            ok: '包装都在，具体怎么操作你跟我说说？',
-            bad: '你能不能直接说能不能退？我问你吊牌在不在干嘛？'
-          },
-          idealAnswer: '您好，很抱歉商品不合适。我们支持签收后7天无理由退货。请问商品是否保持原包装和吊牌完好？如果完好，您可以在订单详情页点击"申请退货"，或我帮您登记退货申请。'
-        },
-        {
-          customer: '好的，那我退货之后多久能收到退款？',
-          keyPoints: ['1-3', '工作日', '退款', '原路', '退回'],
-          politePhrases: ['您好', '帮', '请'],
-          minLength: 10,
-          followUps: {
-            good: '明白了，退款到原支付账户是吧，谢谢你的耐心解答！',
-            ok: '嗯，知道了，退款到原来的账户是吧。',
-            bad: '怎么要这么久？别的平台都是秒退的。'
-          },
-          idealAnswer: '仓库收到退货商品并验货通过后，退款将在1-3个工作日内原路退回到您的支付账户。您可以在订单详情中查看退款进度，如有问题随时联系我们。'
-        },
-        {
-          customer: '对了，退货的运费谁来出？',
-          keyPoints: ['运费', '无理由', '买家', '质量问题', '卖家'],
-          politePhrases: ['您好', '请'],
-          minLength: 10,
-          followUps: {
-            good: '好的，明白了，谢谢你，我现在就去申请退货！',
-            ok: '嗯，好的，我知道了。',
-            bad: '凭什么我出运费？衣服质量也有问题你们也不说！'
-          },
-          idealAnswer: '您好，7天无理由退货的运费由买家承担。但如果是商品质量问题导致的退货，运费由我们承担。请问您的商品是否有质量问题呢？'
-        }
-      ]
-    },
-    logistics: {
-      name: '催单客户 李女士', avatar: '李',
-      rounds: [
-        {
-          customer: '我的订单都下单三天了，怎么还没发货？订单号 20260815001',
-          keyPoints: ['订单', '查询', '物流', '发货', '抱歉'],
-          politePhrases: ['您好', '帮', '抱歉', '请'],
-          minLength: 15,
-          followUps: {
-            good: '好吧，那帮我催一下可以吗？大概什么时候能发？',
-            ok: '那你帮我看看什么时候能发货。',
-            bad: '三天了都不发货，你们是不是骗子公司？'
-          },
-          idealAnswer: '您好，非常抱歉让您久等了。请提供一下订单号，我帮您查询订单状态和发货进度。一般情况下订单会在付款后48小时内发货，如果超出时效我会帮您加急处理。'
-        },
-        {
-          customer: '那你们最多多久能发货？我急着要。',
-          keyPoints: ['24小时', '48小时', '加急', '发货', '抱歉'],
-          politePhrases: ['您好', '帮', '抱歉'],
-          minLength: 10,
-          followUps: {
-            good: '好的，那就帮我加急处理吧，谢谢。',
-            ok: '嗯，那你帮我催一下吧。',
-            bad: '又是48小时？我已经等了三天了！'
-          },
-          idealAnswer: '您好，我理解您的心情。我已经帮您标记为加急订单，最迟会在24小时内安排发货。发货后您会收到短信通知，也可以在订单详情中查看物流信息。给您带来不便非常抱歉。'
-        },
-        {
-          customer: '发货后物流大概几天能到？我在北京。',
-          keyPoints: ['1-2', '天', '北京', '物流', '追踪'],
-          politePhrases: ['您好', '请'],
-          minLength: 10,
-          followUps: {
-            good: '好的，明白了，谢谢你的帮助！',
-            ok: '嗯，知道了，谢谢。',
-            bad: '那我要是一直不到怎么办？'
-          },
-          idealAnswer: '您好，北京地区一般发货后1-2天即可送达。发货后您可以在订单详情页点击"查看物流"实时追踪包裹位置。如果超时未送达，请随时联系我们处理。'
-        }
-      ]
-    },
-    complaint: {
-      name: '投诉客户 张先生', avatar: '张',
-      rounds: [
-        {
-          customer: '你们发来的电饭煲外观有划痕，而且按键也不灵，什么质量！',
-          keyPoints: ['抱歉', '质量问题', '退换', '照片', '凭证'],
-          politePhrases: ['您好', '抱歉', '帮', '请'],
-          minLength: 15,
-          followUps: {
-            good: '好的，照片我现在就拍，发给你们哪里？',
-            ok: '那我拍照发给你们看看？',
-            bad: '还要拍照？你们发个坏的东西还有理了？'
-          },
-          idealAnswer: '您好，非常抱歉给您带来不好的体验。质量问题我们一定负责到底。请您拍几张商品问题的照片（包括划痕和按键位置），发给我们这边核实，我们马上为您办理退换货，运费由我们承担。'
-        },
-        {
-          customer: '照片拍了，我要求换一个新的，不要退货。',
-          keyPoints: ['换货', '换新', '运费', '承担', '寄回'],
-          politePhrases: ['您好', '帮', '请'],
-          minLength: 10,
-          followUps: {
-            good: '好的，那我寄回去的地址是什么？',
-            ok: '那我寄到哪？',
-            bad: '又要我寄回去？我不能直接去门店换吗？'
-          },
-          idealAnswer: '您好，没问题，我们为您办理换货，寄一台全新的同款商品给您。请您将原商品寄回，运费由我们承担（到付即可）。我发您一个退货地址，收到商品验货后48小时内发出新商品。'
-        },
-        {
-          customer: '这次的质量你们怎么保证？别又发个坏的来。',
-          keyPoints: ['质检', '检测', '保证', '包装', '抱歉'],
-          politePhrases: ['您好', '抱歉', '保证'],
-          minLength: 10,
-          followUps: {
-            good: '好的，那我等着收货吧，希望这次没问题。',
-            ok: '嗯，希望这次质量好一点。',
-            bad: '你们每次都这么说，质量还是不行。'
-          },
-          idealAnswer: '您好，非常理解您的顾虑。我保证这次发出的商品会经过仓库质检人员再次检测确认无误后才发出，同时加强包装保护。如果收到的商品仍有任何问题，我们支持再次退换，并额外补偿您20元优惠券。给您带来的不便再次表示歉意。'
-        }
-      ]
-    },
-    payment: {
-      name: '支付客户 陈小姐', avatar: '陈',
-      rounds: [
-        {
-          customer: '我付款的时候显示支付失败，但是我银行卡钱扣了，怎么回事？',
-          keyPoints: ['支付', '核实', '订单', '退款', '抱歉'],
-          politePhrases: ['您好', '帮', '抱歉', '请'],
-          minLength: 15,
-          followUps: {
-            good: '好的，订单号是 20260816002，麻烦你帮我查一下。',
-            ok: '订单号 20260816002，你帮我看看。',
-            bad: '你们系统有问题还让我等？我钱都扣了！'
-          },
-          idealAnswer: '您好，非常抱歉遇到这个问题。这种情况可能是支付通道延迟导致的。请您提供一下订单号，我帮您核实支付状态。如果确认扣款但订单未支付成功，系统会在1-3个工作日内自动退款到您的银行卡。'
-        },
-        {
-          customer: '那我现在能重新支付吗？还是等退款到了再买？',
-          keyPoints: ['重新支付', '订单', '保留', '退款', '到账'],
-          politePhrases: ['您好', '帮', '请'],
-          minLength: 10,
-          followUps: {
-            good: '好的，我现在重新支付，谢谢。',
-            ok: '嗯，那我重新付一下。',
-            bad: '万一又扣钱怎么办？你们系统可靠吗？'
-          },
-          idealAnswer: '您好，建议您可以直接重新支付该订单，订单商品会为您保留。之前的扣款会在1-3个工作日内原路退回到您的银行卡，不会造成重复扣款。如果您不急，也可以等退款到账后再重新下单。您看哪种方式方便？'
-        },
-        {
-          customer: '好的我重新支付成功了，之前的退款大概几天到账？',
-          keyPoints: ['1-3', '工作日', '退款', '到账', '银行卡'],
-          politePhrases: ['您好', '请'],
-          minLength: 8,
-          followUps: {
-            good: '好的，谢谢你的耐心帮助！',
-            ok: '嗯，知道了。',
-            bad: '又是1-3天？能不能快点？'
-          },
-          idealAnswer: '您好，恭喜订单支付成功！之前的扣款退款会在1-3个工作日内原路退回到您的银行卡。不同银行到账时间可能略有差异，如超过3个工作日未到账，请随时联系我们处理。感谢您的耐心配合！'
-        }
-      ]
-    },
-    invoice: {
-      name: '发票客户 刘总', avatar: '刘',
-      rounds: [
-        {
-          customer: '你好，我这边是公司采购，需要开增值税专用发票，怎么操作？',
-          keyPoints: ['发票', '增值税', '专用', '税号', '订单'],
-          politePhrases: ['您好', '帮', '请'],
-          minLength: 15,
-          followUps: {
-            good: '好的，税号是 91110000XXXXXX，资料我发到哪里？',
-            ok: '那我提供税号给你们？',
-            bad: '我下单的时候怎么没看到开发票的地方？'
-          },
-          idealAnswer: '您好，公司采购可以开具增值税专用发票。请您提供以下信息：企业名称、税号、注册地址、注册电话、开户银行和账号。您可以在下单时结算页勾选"开具发票"填写信息，也可以在订单完成后联系我帮您补开。'
-        },
-        {
-          customer: '发票开好后多久能收到？是电子的还是纸质的？',
-          keyPoints: ['电子', '纸质', '邮寄', '3-5', '工作日'],
-          politePhrases: ['您好', '帮', '请'],
-          minLength: 10,
-          followUps: {
-            good: '好的，那我用电子的吧，方便一点。',
-            ok: '嗯，电子的可以吗？',
-            bad: '为什么不能当场开？别的平台都是电子发票秒开的。'
-          },
-          idealAnswer: '您好，增值税专用发票目前只提供纸质版，开具周期3-5个工作日。开好后会通过顺丰快递邮寄到您指定的地址，邮费由我们承担。如果您急需，也可以先开电子普通发票作为临时凭证，专票后续补寄。'
-        },
-        {
-          customer: '那如果发票信息开错了，能重新开吗？',
-          keyPoints: ['重开', '作废', '修改', '换开', '寄回'],
-          politePhrases: ['您好', '帮', '请'],
-          minLength: 10,
-          followUps: {
-            good: '好的，明白了，谢谢你详细的解答！',
-            ok: '嗯，知道了，谢谢。',
-            bad: '还要我把原票寄回？太麻烦了吧。'
-          },
-          idealAnswer: '您好，如果发票信息开错了是可以重开的。请您将原发票寄回（电子普通发票无需寄回，我们直接作废重开），我们在收到原发票后3个工作日内为您重新开具正确的发票。重开不产生额外费用，给您带来不便非常抱歉。'
-        }
-      ]
-    }
-  };
-
-  var simState = { scenarioId: 'return', roundIndex: 0, totalScore: 0, roundScores: [], active: false, finished: false };
-  var simMessages = document.getElementById('simMessages');
-  var simStartOverlay = document.getElementById('simStartOverlay');
-  var simInputArea = document.getElementById('simInputArea');
-  var simInput = document.getElementById('simInput');
-  var simSendBtn = document.getElementById('simSendBtn');
-  var simStartBtn = document.getElementById('simStartBtn');
-  var simScoreEl = document.getElementById('simScore');
-  var simCustomerName = document.getElementById('simCustomerName');
-  var simAvatar = document.getElementById('simAvatar');
-  var simStatus = document.getElementById('simStatus');
-  var simSummaryArea = document.getElementById('simSummaryArea');
-  var simSuggestPanel = document.getElementById('simSuggestPanel');
-  var simSuggestBody = document.getElementById('simSuggestBody');
-  var simHintBtn = document.getElementById('simHintBtn');
-  var simSuggestClose = document.getElementById('simSuggestClose');
-  var simUseBtn = document.getElementById('simUseBtn');
-  var scenarioBtns = document.querySelectorAll('.scenario-btn');
-
-  scenarioBtns.forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      scenarioBtns.forEach(function (b) { b.classList.remove('active'); });
-      btn.classList.add('active');
-      simState.scenarioId = btn.getAttribute('data-scenario');
-      var sc = scenarios[simState.scenarioId];
-      if (sc) { simCustomerName.textContent = sc.name; simAvatar.textContent = sc.avatar; }
-      resetSimulation();
-    });
-  });
-
-  function resetSimulation() {
-    simState.roundIndex = 0; simState.totalScore = 0; simState.roundScores = [];
-    simState.active = false; simState.finished = false;
-    simScoreEl.textContent = '0'; simStatus.textContent = '等待开始对话...';
-    simInputArea.style.display = 'none'; simStartOverlay.style.display = 'flex';
-    simMessages.innerHTML = ''; simMessages.appendChild(simStartOverlay);
-    simSummaryArea.innerHTML = ''; simInput.value = '';
-    if (simSuggestPanel) simSuggestPanel.style.display = 'none';
-    if (simHintBtn) simHintBtn.classList.remove('active');
-  }
-
-  function startSimulation() {
-    var sc = scenarios[simState.scenarioId];
-    if (!sc) return;
-    simState.active = true; simState.finished = false;
-    simState.roundIndex = 0; simState.totalScore = 0; simState.roundScores = [];
-    simScoreEl.textContent = '0'; simSummaryArea.innerHTML = '';
-    simStartOverlay.style.display = 'none'; simInputArea.style.display = 'flex';
-    simStatus.textContent = '对话进行中...';
-    simCustomerName.textContent = sc.name; simAvatar.textContent = sc.avatar;
-    setTimeout(function () { addCustomerMessage(sc.rounds[0].customer); }, 500);
-  }
-
-  function addCustomerMessage(text) {
-    var time = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
-    var msg = document.createElement('div');
-    msg.className = 'sim-msg customer';
-    msg.innerHTML = '<div class="msg-avatar">客</div><div><div class="msg-bubble">' + escapeHtml(text) + '</div><div class="msg-time">' + time + '</div></div>';
-    simMessages.appendChild(msg);
-    simMessages.scrollTop = simMessages.scrollHeight;
-  }
-
-  function addAgentMessage(text) {
-    var time = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
-    var msg = document.createElement('div');
-    msg.className = 'sim-msg agent';
-    msg.innerHTML = '<div class="msg-avatar">我</div><div><div class="msg-bubble">' + escapeHtml(text) + '</div><div class="msg-time">' + time + '</div></div>';
-    simMessages.appendChild(msg);
-    simMessages.scrollTop = simMessages.scrollHeight;
-  }
-
-  function updateSuggestPanel(round) {
-    if (!simSuggestBody || !round) return;
-    var tipsHtml = '';
-    round.keyPoints.forEach(function (kp) { tipsHtml += '<span class="tip-chip">' + escapeHtml(kp) + '</span>'; });
-    simSuggestBody.innerHTML =
-      '<div class="suggest-label">建议回复话术</div>' +
-      '<div class="suggest-answer">' + escapeHtml(round.idealAnswer) + '</div>' +
-      '<div class="suggest-tips"><strong>话术要点：</strong>建议在回复中提及以下关键词</div>' +
-      '<div class="tip-list">' + tipsHtml + '</div>';
-  }
-
-  function showSuggestPanel() {
-    if (!simState.active || simState.finished) return;
-    var sc = scenarios[simState.scenarioId];
-    var round = sc.rounds[simState.roundIndex];
-    if (!round) return;
-    updateSuggestPanel(round);
-    if (simSuggestPanel) simSuggestPanel.style.display = 'block';
-    if (simHintBtn) simHintBtn.classList.add('active');
-  }
-
-  function hideSuggestPanel() {
-    if (simSuggestPanel) simSuggestPanel.style.display = 'none';
-    if (simHintBtn) simHintBtn.classList.remove('active');
-  }
-
-  function useSuggestScript() {
-    var sc = scenarios[simState.scenarioId];
-    var round = sc.rounds[simState.roundIndex];
-    if (!round) return;
-    simInput.value = round.idealAnswer;
-    simInput.focus();
-    simInput.style.height = 'auto';
-    simInput.style.height = Math.min(simInput.scrollHeight, 100) + 'px';
-  }
-
-  function addFeedback(feedback) {
-    var fb = document.createElement('div');
-    fb.className = 'sim-feedback ' + feedback.rating;
-    var tagsHtml = '';
-    feedback.tags.forEach(function (tag) {
-      tagsHtml += '<span class="fb-tag ' + (tag.hit ? 'hit' : 'miss') + '">' + (tag.hit ? '' : '未提及 ') + escapeHtml(tag.text) + '</span>';
-    });
-    var idealHtml = '';
-    if (feedback.idealAnswer) {
-      idealHtml = '<div class="sim-ideal-in-feedback">' +
-        '<div class="if-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>建议话术 · 参考回复</div>' +
-        '<div class="if-body">' + escapeHtml(feedback.idealAnswer) + '</div></div>';
-    }
-    fb.innerHTML = '<strong>评分：' + feedback.score + '/100</strong> — ' + feedback.comment + '<div class="fb-tags">' + tagsHtml + '</div>' + idealHtml;
-    simMessages.appendChild(fb);
-    simMessages.scrollTop = simMessages.scrollHeight;
-  }
-
-  function evaluateResponse(response, round) {
-    var lowerResp = response.toLowerCase();
-    var respText = response;
-    var hitPoints = [], missPoints = [];
-    round.keyPoints.forEach(function (kp) {
-      if (respText.indexOf(kp) !== -1 || lowerResp.indexOf(kp.toLowerCase()) !== -1) { hitPoints.push(kp); }
-      else { missPoints.push(kp); }
-    });
-    var hitPolite = [];
-    round.politePhrases.forEach(function (pp) { if (respText.indexOf(pp) !== -1) { hitPolite.push(pp); } });
-    var keyScore = (hitPoints.length / round.keyPoints.length) * 50;
-    var politeScore = hitPolite.length > 0 ? 20 : 0;
-    var lengthScore = respText.length >= round.minLength ? 15 : (respText.length / round.minLength) * 15;
-    var bonus = 0;
-    if (missPoints.length === 0 && hitPolite.length >= 2) { bonus = 15; }
-    else if (missPoints.length <= 1) { bonus = 8; }
-    var total = Math.round(keyScore + politeScore + lengthScore + bonus);
-    var rating, comment;
-    if (total >= 80) { rating = 'good'; comment = '回答专业完整，关键信息覆盖全面，服务态度良好！'; }
-    else if (total >= 50) { rating = 'warn'; comment = '回答基本到位，但部分关键信息遗漏，可以更完整。'; }
-    else { rating = 'warn'; comment = '回复不够完整，缺少重要信息，请参考建议话术改进。'; }
-    var tags = round.keyPoints.map(function (kp) { return { text: kp, hit: hitPoints.indexOf(kp) !== -1 }; });
-    return { score: total, rating: rating, comment: comment, tags: tags, hitCount: hitPoints.length, totalCount: round.keyPoints.length, idealAnswer: round.idealAnswer };
-  }
-
-  function handleSend() {
-    if (!simState.active || simState.finished) return;
-    var text = simInput.value.trim();
-    if (!text) return;
-    addAgentMessage(text);
-    simInput.value = '';
-    simInput.style.height = 'auto';
-    hideSuggestPanel();
-    var sc = scenarios[simState.scenarioId];
-    var round = sc.rounds[simState.roundIndex];
-    var feedback = evaluateResponse(text, round);
-    simState.totalScore += feedback.score;
-    simState.roundScores.push(feedback.score);
-    simScoreEl.textContent = simState.totalScore;
-    setTimeout(function () {
-      addFeedback(feedback);
-      setTimeout(function () {
-        var nextRoundIndex = simState.roundIndex + 1;
-        if (nextRoundIndex < sc.rounds.length) {
-          var ratingKey = feedback.rating === 'good' ? 'good' : (feedback.score >= 50 ? 'ok' : 'bad');
-          addCustomerMessage(round.followUps[ratingKey]);
-          simState.roundIndex = nextRoundIndex;
-        } else { finishSimulation(); }
-      }, 800);
-    }, 500);
-  }
-
-  function finishSimulation() {
-    simState.finished = true; simState.active = false;
-    simInputArea.style.display = 'none'; hideSuggestPanel();
-    simStatus.textContent = '对话已结束';
-    var sc = scenarios[simState.scenarioId];
-    var avgScore = Math.round(simState.totalScore / sc.rounds.length);
-    var grade, gradeColor;
-    if (avgScore >= 85) { grade = '优秀'; gradeColor = '#22c55e'; }
-    else if (avgScore >= 70) { grade = '良好'; gradeColor = '#6366f1'; }
-    else if (avgScore >= 50) { grade = '及格'; gradeColor = '#f97316'; }
-    else { grade = '需改进'; gradeColor = '#ef4444'; }
-    var scoreBars = '';
-    sc.rounds.forEach(function (r, i) {
-      var score = simState.roundScores[i] || 0;
-      var barColor = score >= 80 ? '#22c55e' : (score >= 50 ? '#f97316' : '#ef4444');
-      scoreBars += '<div style="margin-bottom:0.5rem"><div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:0.2rem"><span>第' + (i + 1) + '轮</span><span style="font-weight:700;color:' + barColor + '">' + score + '分</span></div><div style="height:6px;background:var(--rule);border-radius:3px;overflow:hidden"><div style="height:100%;width:' + score + '%;background:' + barColor + ';border-radius:3px;transition:width 0.5s"></div></div></div>';
-    });
-    var summary = document.createElement('div');
-    summary.className = 'sim-summary';
-    summary.innerHTML =
-      '<h5>演练总结报告</h5>' +
-      '<div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.75rem"><div class="summary-score">' + avgScore + '</div><div><div style="font-size:1.1rem;font-weight:700;color:' + gradeColor + '">' + grade + '</div><div style="font-size:0.8rem;color:var(--muted)">' + sc.name + '场景</div></div></div>' +
-      '<div class="summary-row"><div class="summary-item">总分 <strong>' + simState.totalScore + '</strong></div><div class="summary-item">轮次 <strong>' + sc.rounds.length + '</strong></div><div class="summary-item">平均 <strong>' + avgScore + '</strong></div></div>' +
-      '<div style="margin-top:1rem">' + scoreBars + '</div>' +
-      '<div style="display:flex;gap:0.6rem;margin-top:1rem"><button class="btn-primary" id="simRetryBtn">再次演练</button><button class="btn-secondary" id="simShowIdealBtn">查看参考话术</button></div>' +
-      '<div id="idealAnswers" style="display:none;margin-top:1rem"></div>';
-    simSummaryArea.appendChild(summary);
-    document.getElementById('simRetryBtn').addEventListener('click', function () { resetSimulation(); startSimulation(); });
-    document.getElementById('simShowIdealBtn').addEventListener('click', function () {
-      var idealDiv = document.getElementById('idealAnswers');
-      if (idealDiv.style.display === 'none') {
-        var html = '<h5 style="font-size:0.9rem;font-weight:700;margin-bottom:0.5rem">参考话术</h5>';
-        sc.rounds.forEach(function (r, i) {
-          html += '<div style="background:rgba(34,197,94,0.05);border:1px solid rgba(34,197,94,0.15);border-radius:8px;padding:0.65rem 0.85rem;margin-bottom:0.5rem"><div style="font-size:0.76rem;color:var(--muted);margin-bottom:0.3rem">第' + (i + 1) + '轮 · 客户：' + escapeHtml(r.customer) + '</div><div style="font-size:0.84rem;color:var(--ink);line-height:1.6">' + escapeHtml(r.idealAnswer) + '</div></div>';
-        });
-        idealDiv.innerHTML = html; idealDiv.style.display = 'block';
-        document.getElementById('simShowIdealBtn').textContent = '隐藏参考话术';
-      } else { idealDiv.style.display = 'none'; document.getElementById('simShowIdealBtn').textContent = '查看参考话术'; }
-    });
-    summary.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }
-
-  if (simStartBtn) simStartBtn.addEventListener('click', startSimulation);
-  if (simSendBtn) simSendBtn.addEventListener('click', handleSend);
-  if (simInput) {
-    simInput.addEventListener('keydown', function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } });
-    simInput.addEventListener('input', function () { simInput.style.height = 'auto'; simInput.style.height = Math.min(simInput.scrollHeight, 100) + 'px'; });
-  }
-  if (simHintBtn) simHintBtn.addEventListener('click', function () { if (simSuggestPanel && simSuggestPanel.style.display === 'block') { hideSuggestPanel(); } else { showSuggestPanel(); } });
-  if (simSuggestClose) simSuggestClose.addEventListener('click', hideSuggestPanel);
-  if (simUseBtn) simUseBtn.addEventListener('click', useSuggestScript);
-
-  // Update sections list for scroll spy
   var newSidebarLinks = document.querySelectorAll('.sidebar a[data-section]');
   sections = [];
   newSidebarLinks.forEach(function (link) {
@@ -2410,5 +1972,141 @@
 
   bindStartBtn();
   updatePoolCount();
+
+  // ============================================================
+  // 14. Consumer Question → Recommended Scripts
+  // ============================================================
+  var SOURCE_COLORS = {
+    kb: { bg: 'rgba(99,102,241,0.1)', text: '#6366f1' },
+    faq: { bg: 'rgba(34,197,94,0.1)', text: '#22c55e' },
+    returns: { bg: 'rgba(249,115,22,0.1)', text: '#f97316' },
+    logistics: { bg: 'rgba(14,165,233,0.1)', text: '#0ea5e9' },
+    payment: { bg: 'rgba(139,92,246,0.1)', text: '#8b5cf6' },
+    'after-sales': { bg: 'rgba(236,72,153,0.1)', text: '#ec4899' }
+  };
+
+  function tokenize(text) {
+    var tokens = [];
+    var lower = text.toLowerCase();
+    var phrases = lower.split(/[，。！？、；：\s,.\!?;:\n\r]+/).filter(function (p) { return p.length > 0; });
+    phrases.forEach(function (phrase) {
+      if (phrase.length === 1) return;
+      tokens.push(phrase);
+      if (/[\u4e00-\u9fa5]/.test(phrase) && phrase.length > 2) {
+        for (var i = 0; i < phrase.length - 1; i++) {
+          var bigram = phrase.substring(i, i + 2);
+          if (bigram.length === 2) tokens.push(bigram);
+        }
+      }
+    });
+    return tokens;
+  }
+
+  function generateRecommendedScripts() {
+    var input = document.getElementById('consumerQuestionInput');
+    var resultsEl = document.getElementById('crpResults');
+    if (!input || !resultsEl) return;
+
+    var question = input.value.trim();
+    if (!question) {
+      resultsEl.innerHTML = '<div class="crp-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>请先输入消费者的问题</div>';
+      return;
+    }
+
+    var pool = collectKnowledgePool();
+    var tokens = tokenize(question);
+
+    if (tokens.length === 0) {
+      resultsEl.innerHTML = '<div class="crp-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>无法识别问题关键词，请输入更详细的问题</div>';
+      return;
+    }
+
+    var scored = pool.map(function (item) {
+      var score = 0;
+      tokens.forEach(function (token) {
+        var isBigram = token.length === 2 && /[\u4e00-\u9fa5]/.test(token);
+        var weight = isBigram ? 0.5 : 2;
+        if (item.searchText.indexOf(token) !== -1) score += weight;
+        if (item.title && item.title.toLowerCase().indexOf(token) !== -1) score += weight * 1.5;
+      });
+      return { item: item, score: Math.round(score * 10) / 10 };
+    }).filter(function (r) { return r.score > 0; })
+      .sort(function (a, b) { return b.score - a.score; })
+      .slice(0, 5);
+
+    if (scored.length === 0) {
+      resultsEl.innerHTML = '<div class="crp-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>未找到匹配的知识内容，请尝试用不同的关键词描述问题</div>';
+      return;
+    }
+
+    var html = '';
+    scored.forEach(function (r, idx) {
+      var item = r.item;
+      var tagColor = SOURCE_COLORS[item.source] || { bg: 'rgba(107,114,128,0.1)', text: '#6b7280' };
+      var sourceLabel = SOURCE_TAGS[item.source] || item.source;
+      var title = item.title ? item.title : '相关内容';
+      var body = item.content || '';
+      if (body.length > 500) body = body.substring(0, 500) + '...';
+
+      html += '<div class="crp-result-card" data-crp-idx="' + idx + '">';
+      html += '<div class="crp-result-head">';
+      html += '<span class="crp-result-tag" style="background:' + tagColor.bg + ';color:' + tagColor.text + '">' + sourceLabel + '</span>';
+      html += '<button class="crp-result-copy" data-copy-text="' + encodeURIComponent(body) + '">';
+      html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+      html += '<span>复制话术</span>';
+      html += '</button>';
+      html += '</div>';
+      html += '<div class="crp-result-body">' + escapeHtml(title) + (body ? '\n\n' + escapeHtml(body) : '') + '</div>';
+      html += '<div class="crp-result-source">来源：' + sourceLabel + ' · 匹配度：' + r.score + ' 分</div>';
+      html += '</div>';
+    });
+
+    resultsEl.innerHTML = html;
+
+    resultsEl.querySelectorAll('.crp-result-copy').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var text = decodeURIComponent(btn.getAttribute('data-copy-text'));
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(text).then(function () {
+            var span = btn.querySelector('span');
+            var orig = span ? span.textContent : '';
+            if (span) span.textContent = '已复制';
+            setTimeout(function () { if (span) span.textContent = orig; }, 2000);
+          });
+        } else {
+          var ta = document.createElement('textarea');
+          ta.value = text;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+          var span2 = btn.querySelector('span');
+          var orig2 = span2 ? span2.textContent : '';
+          if (span2) span2.textContent = '已复制';
+          setTimeout(function () { if (span2) span2.textContent = orig2; }, 2000);
+        }
+      });
+    });
+  }
+
+  var crpGenerateBtn = document.getElementById('crpGenerateBtn');
+  var crpClearBtn = document.getElementById('crpClearBtn');
+  var consumerQuestionInput = document.getElementById('consumerQuestionInput');
+
+  if (crpGenerateBtn) crpGenerateBtn.addEventListener('click', generateRecommendedScripts);
+  if (crpClearBtn) {
+    crpClearBtn.addEventListener('click', function () {
+      if (consumerQuestionInput) consumerQuestionInput.value = '';
+      var resultsEl = document.getElementById('crpResults');
+      if (resultsEl) {
+        resultsEl.innerHTML = '<div class="crp-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>粘贴消费者问题后点击"生成推荐话术"，系统将从知识库中匹配相关内容</div>';
+      }
+    });
+  }
+  if (consumerQuestionInput) {
+    consumerQuestionInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); generateRecommendedScripts(); }
+    });
+  }
 
 })();
