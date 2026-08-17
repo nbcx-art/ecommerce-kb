@@ -1686,37 +1686,100 @@
 
     usable = shuffleArr(usable);
     var questions = [];
-    var count = Math.min(10, usable.length);
-    var poolFiltered = pool.filter(function (item) {
-      return item.content && item.content.length > 15;
-    });
+    var count = Math.min(15, usable.length);
 
     for (var i = 0; i < count; i++) {
-      var item = usable[i];
-      if (i % 3 === 2) {
-        questions.push(makeMultipleChoice(item, poolFiltered, i));
+      var item = usable[i % usable.length];
+      var isMulti = Math.random() < 0.4;
+      if (isMulti) {
+        questions.push(makeMultipleChoice(item, i));
       } else {
-        questions.push(makeSingleChoice(item, poolFiltered, i));
+        questions.push(makeSingleChoice(item, i));
       }
     }
 
     return questions;
   }
 
-  function makeSingleChoice(item, pool, currentIdx) {
-    var others = pool.filter(function (p) {
-      return p.title !== item.title && p.content !== item.content;
-    });
-    others = shuffleArr(others).slice(0, 3);
+  function mutateText(text) {
+    var mutations = [];
 
-    while (others.length < 3) {
-      var fake = { content: '暂无相关内容信息' };
-      others.push(fake);
+    var numMatches = text.match(/\d+/g);
+    if (numMatches && numMatches.length > 0) {
+      for (var n = 0; n < numMatches.length; n++) {
+        var orig = numMatches[n];
+        var num = parseInt(orig);
+        var variants = [num + 1, num + 2, num - 1, num * 2, num + 5];
+        var picked = variants[Math.floor(Math.random() * variants.length)];
+        if (picked < 0) picked = num + 3;
+        var mutated = text.replace(orig, String(picked));
+        if (mutated !== text) mutations.push(mutated);
+        break;
+      }
     }
 
-    var correctText = truncateStr(item.content, 100);
-    var options = others.map(function (o) { return truncateStr(o.content, 100); });
-    options.push(correctText);
+    var negationPairs = [
+      { from: '可以', to: '不可以' }, { from: '不支持', to: '支持' }, { from: '支持', to: '不支持' },
+      { from: '退款', to: '换货' }, { from: '退货', to: '换货' }, { from: '换货', to: '退货' },
+      { from: '工作日', to: '自然日' }, { from: '原路', to: '另行' },
+      { from: '免费', to: '收费' }, { from: '收费', to: '免费' },
+      { from: '7天', to: '3天' }, { from: '15天', to: '7天' }, { from: '3天', to: '15天' },
+      { from: '24小时', to: '48小时' }, { from: '48小时', to: '24小时' },
+      { from: '微信', to: '支付宝' }, { from: '支付宝', to: '微信' },
+      { from: '银行卡', to: '信用卡' }, { from: '信用卡', to: '银行卡' },
+      { from: '全部', to: '部分' }, { from: '部分', to: '全部' },
+      { from: '必须', to: '无需' }, { from: '无需', to: '必须' },
+      { from: '原包装', to: '任意包装' }, { from: '二次销售', to: '三次销售' }
+    ];
+    var shuffledPairs = shuffleArr(negationPairs);
+    for (var p = 0; p < shuffledPairs.length; p++) {
+      var pair = shuffledPairs[p];
+      if (text.indexOf(pair.from) !== -1) {
+        var mutated2 = text.replace(pair.from, pair.to);
+        if (mutated2 !== text && mutations.indexOf(mutated2) === -1) {
+          mutations.push(mutated2);
+          break;
+        }
+      }
+    }
+
+    if (mutations.length === 0) {
+      var prefix = ['根据规定，', '通常情况下，', '一般情况下，', '在特殊情况下，', '请注意：'];
+      mutations.push(prefix[Math.floor(Math.random() * prefix.length)] + text);
+    }
+
+    return mutations;
+  }
+
+  function makeSingleChoice(item, currentIdx) {
+    var correctText = truncateStr(item.content, 120);
+    var mutations = mutateText(correctText);
+    var wrongOptions = [];
+
+    while (wrongOptions.length < 3 && mutations.length > 0) {
+      var m = mutations.shift();
+      var truncated = truncateStr(m, 120);
+      if (truncated !== correctText && wrongOptions.indexOf(truncated) === -1) {
+        wrongOptions.push(truncated);
+      }
+    }
+
+    while (wrongOptions.length < 3) {
+      var extra = mutateText(correctText);
+      for (var e = 0; e < extra.length && wrongOptions.length < 3; e++) {
+        var t = truncateStr(extra[e], 120);
+        if (t !== correctText && wrongOptions.indexOf(t) === -1) {
+          wrongOptions.push(t);
+        }
+      }
+      if (extra.length === 0) break;
+    }
+
+    while (wrongOptions.length < 3) {
+      wrongOptions.push('此项描述与正确答案不符');
+    }
+
+    var options = wrongOptions.concat([correctText]);
     options = shuffleArr(options);
     var correctIdx = options.indexOf(correctText);
 
@@ -1730,47 +1793,48 @@
     };
   }
 
-  function makeMultipleChoice(item, pool, currentIdx) {
+  function makeMultipleChoice(item, currentIdx) {
     var sentences = splitSentences(item.content);
-    var others = pool.filter(function (p) {
-      return p.title !== item.title && p.content !== item.content;
+    var allOptions = [];
+    var correctIndices = [];
+
+    sentences.slice(0, 3).forEach(function (s) {
+      allOptions.push(truncateStr(s, 100));
+      correctIndices.push(allOptions.length - 1);
     });
-    others = shuffleArr(others);
 
-    var correctOpts = sentences.slice(0, 2).map(function (s) { return truncateStr(s, 80); });
-    while (correctOpts.length < 1) {
-      correctOpts.push(truncateStr(item.content, 60));
-    }
-
-    var wrongOpts = [];
-    for (var j = 0; j < others.length && wrongOpts.length < 2; j++) {
-      var otherSentences = splitSentences(others[j].content);
-      if (otherSentences.length > 0) {
-        wrongOpts.push(truncateStr(otherSentences[0], 80));
+    while (allOptions.length < 4) {
+      var src = sentences.length > 0 ? sentences[Math.floor(Math.random() * sentences.length)] : item.content;
+      var muts = mutateText(truncateStr(src, 100));
+      if (muts.length > 0) {
+        var m = truncateStr(muts[0], 100);
+        if (allOptions.indexOf(m) === -1) allOptions.push(m);
+      } else {
+        break;
       }
     }
-    while (wrongOpts.length < 2) {
-      wrongOpts.push('此项描述与本题无关');
+
+    while (allOptions.length < 4) {
+      allOptions.push('此项描述不正确');
     }
 
-    while (correctOpts.length < 2) {
-      correctOpts.push(truncateStr(sentences[correctOpts.length] || item.content, 80));
+    if (correctIndices.length > 3) correctIndices = correctIndices.slice(0, 3);
+    if (correctIndices.length < 2) {
+      var extraSrc = sentences.length > 1 ? truncateStr(sentences[1], 100) : truncateStr(item.content, 60);
+      allOptions.push(extraSrc);
+      correctIndices.push(allOptions.length - 1);
     }
 
-    var targetCorrect = 1 + Math.floor(Math.random() * 2);
-    correctOpts = correctOpts.slice(0, targetCorrect);
-    wrongOpts = wrongOpts.slice(0, 4 - targetCorrect);
-
-    var options = correctOpts.concat(wrongOpts);
-    options = shuffleArr(options);
-    var correctIndices = correctOpts.map(function (opt) { return options.indexOf(opt); }).filter(function (idx) { return idx >= 0; });
+    var shuffled = shuffleArr(allOptions.map(function (opt, idx) { return { text: opt, isCorrect: correctIndices.indexOf(idx) >= 0 }; }));
+    var finalOptions = shuffled.map(function (s) { return s.text; });
+    var finalCorrect = shuffled.map(function (s, idx) { return s.isCorrect ? idx : -1; }).filter(function (i) { return i >= 0; });
 
     return {
       type: 'multiple',
       source: item.source,
       question: '关于「' + item.title + '」，以下哪些说法是正确的？（多选）',
-      options: options,
-      correct: correctIndices,
+      options: finalOptions,
+      correct: finalCorrect,
       explanation: item.content
     };
   }
@@ -1876,6 +1940,10 @@
     var optLabels = ['A', 'B', 'C', 'D', 'E', 'F'];
 
     var html = '<div class="exam-result-summary">';
+    html += '<div style="display:flex;justify-content:center;gap:1.5rem;flex-wrap:wrap;margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid var(--border)">';
+    html += '<div style="font-size:0.82rem;color:var(--muted)">考生：<strong style="color:var(--dark)">' + escapeHtml(examStudentName) + '</strong></div>';
+    html += '<div style="font-size:0.82rem;color:var(--muted)">日期：<strong style="color:var(--dark)">' + escapeHtml(examStudentDate) + '</strong></div>';
+    html += '</div>';
     html += '<div class="exam-score-circle ' + (passed ? 'pass' : 'fail') + '">';
     html += '<div class="score-num">' + totalScore + '</div>';
     html += '<div class="score-label">' + (passed ? '恭喜通过' : '未通过') + '</div>';
@@ -1917,10 +1985,32 @@
     container.innerHTML = html;
 
     var retryBtn = document.getElementById('examRetryBtn');
-    if (retryBtn) retryBtn.addEventListener('click', startExam);
+    if (retryBtn) retryBtn.addEventListener('click', resetExam);
   }
 
+  var examStudentName = '';
+  var examStudentDate = '';
+
   function startExam() {
+    var nameInput = document.getElementById('examNameInput');
+    var dateInput = document.getElementById('examDateInput');
+
+    if (nameInput && !nameInput.value.trim()) {
+      nameInput.style.borderColor = '#ef4444';
+      nameInput.focus();
+      var hint = document.getElementById('examNameHint');
+      if (hint) hint.style.display = 'block';
+      return;
+    }
+    if (dateInput && !dateInput.value.trim()) {
+      dateInput.style.borderColor = '#ef4444';
+      dateInput.focus();
+      return;
+    }
+
+    examStudentName = nameInput ? nameInput.value.trim() : '';
+    examStudentDate = dateInput ? dateInput.value.trim() : '';
+
     examAnswers = {};
     var questions = generateExamQuestions();
     if (!questions) {
@@ -1937,21 +2027,48 @@
   function resetExam() {
     examQuestions = [];
     examAnswers = {};
+    examStudentName = '';
+    examStudentDate = '';
     var container = document.getElementById('examContainer');
     if (!container) return;
+
+    var today = new Date();
+    var todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+
     container.innerHTML =
       '<div class="exam-start-panel" id="examStartPanel">' +
         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:48px;height:48px;color:#6366f1;margin:0 auto 1rem;display:block"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 13l2 2 4-4"/></svg>' +
-        '<p style="font-size:0.9rem;color:var(--muted);max-width:400px;margin:0 auto 1rem">点击下方按钮开始考试，系统将从知识管理、常见问题、退换货政策、物流配送、支付方式、售后服务中随机生成题目</p>' +
+        '<p style="font-size:0.9rem;color:var(--muted);max-width:400px;margin:0 auto 1rem">系统将从知识管理、常见问题、退换货政策、物流配送、支付方式、售后服务中随机生成15道选择题</p>' +
         '<div class="exam-info">' +
           '<div class="exam-stat"><div class="num" id="examPoolCount">-</div><div class="label">知识条目</div></div>' +
-          '<div class="exam-stat"><div class="num">10</div><div class="label">考试题数</div></div>' +
+          '<div class="exam-stat"><div class="num">15</div><div class="label">考试题数</div></div>' +
           '<div class="exam-stat"><div class="num">60</div><div class="label">合格分数</div></div>' +
         '</div>' +
-        '<button class="btn-primary" id="examStartBtn" style="padding:0.7rem 2rem;font-size:0.9rem">' +
+        '<div style="max-width:360px;margin:1.2rem auto 0;display:flex;flex-direction:column;gap:0.8rem">' +
+          '<div style="text-align:left">' +
+            '<label style="font-size:0.82rem;font-weight:600;color:var(--dark);display:block;margin-bottom:0.3rem">考生姓名 <span style="color:#ef4444">*</span></label>' +
+            '<input type="text" id="examNameInput" placeholder="请输入姓名" style="width:100%;padding:0.6rem 0.8rem;border:1.5px solid var(--border);border-radius:8px;font-size:0.88rem;font-family:var(--font);box-sizing:border-box;transition:border-color 0.2s" />' +
+            '<p id="examNameHint" style="display:none;color:#ef4444;font-size:0.74rem;margin-top:0.3rem">请填写姓名后才能开始考试</p>' +
+          '</div>' +
+          '<div style="text-align:left">' +
+            '<label style="font-size:0.82rem;font-weight:600;color:var(--dark);display:block;margin-bottom:0.3rem">考试日期 <span style="color:#ef4444">*</span></label>' +
+            '<input type="date" id="examDateInput" value="' + todayStr + '" style="width:100%;padding:0.6rem 0.8rem;border:1.5px solid var(--border);border-radius:8px;font-size:0.88rem;font-family:var(--font);box-sizing:border-box;transition:border-color 0.2s" />' +
+          '</div>' +
+        '</div>' +
+        '<button class="btn-primary" id="examStartBtn" style="padding:0.7rem 2rem;font-size:0.9rem;margin-top:1.2rem">' +
           '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;margin-right:0.3rem;vertical-align:middle"><polygon points="5 3 19 12 5 21 5 3"/></svg>开始考试' +
         '</button>' +
       '</div>';
+
+    var nameInput = document.getElementById('examNameInput');
+    if (nameInput) {
+      nameInput.addEventListener('input', function () {
+        nameInput.style.borderColor = '';
+        var hint = document.getElementById('examNameHint');
+        if (hint) hint.style.display = 'none';
+      });
+    }
+
     updatePoolCount();
     bindStartBtn();
   }
@@ -1968,6 +2085,21 @@
   function bindStartBtn() {
     var btn = document.getElementById('examStartBtn');
     if (btn) btn.addEventListener('click', startExam);
+
+    var dateInput = document.getElementById('examDateInput');
+    if (dateInput && !dateInput.value) {
+      var today = new Date();
+      dateInput.value = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+    }
+
+    var nameInput = document.getElementById('examNameInput');
+    if (nameInput) {
+      nameInput.addEventListener('input', function () {
+        nameInput.style.borderColor = '';
+        var hint = document.getElementById('examNameHint');
+        if (hint) hint.style.display = 'none';
+      });
+    }
   }
 
   bindStartBtn();
