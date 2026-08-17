@@ -1425,7 +1425,7 @@
         e.productName || '',
         e.merchantCode || '',
         e.brand || '',
-        (e.keywords || []).join('、'),
+        (e.keywords || ''),
         e.answer || '',
         e.createdAt ? new Date(e.createdAt).toLocaleString('zh-CN') : ''
       ]);
@@ -2018,8 +2018,8 @@
         source: 'kb',
         title: e.question || '',
         content: e.answer || '',
-        keywords: (e.keywords || []).join(' ') + ' ' + (e.productName || '') + ' ' + (e.brand || ''),
-        searchText: (e.question + ' ' + e.answer + ' ' + (e.keywords || []).join(' ') + ' ' + (e.productName || '') + ' ' + (e.brand || '')).toLowerCase()
+        keywords: (e.keywords || '') + ' ' + (e.productName || '') + ' ' + (e.brand || ''),
+        searchText: (e.question + ' ' + e.answer + ' ' + (e.keywords || '') + ' ' + (e.productName || '') + ' ' + (e.brand || '')).toLowerCase()
       });
     });
 
