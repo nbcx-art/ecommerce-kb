@@ -1990,7 +1990,7 @@
   if (!isAuthed()) showLogin();
 
   // ============================================================
-  // 13. Consumer Role-Play: Auto-generate recommended scripts
+  // 13. CS Exam: Auto-generate quiz from knowledge base
   // ============================================================
   var SOURCE_TAGS = {
     kb: '知识管理',
@@ -2000,36 +2000,24 @@
     payment: '支付方式',
     'after-sales': '售后服务'
   };
-  var SOURCE_COLORS = {
-    kb: { bg: 'rgba(99,102,241,0.1)', text: '#6366f1' },
-    faq: { bg: 'rgba(34,197,94,0.1)', text: '#22c55e' },
-    returns: { bg: 'rgba(249,115,22,0.1)', text: '#f97316' },
-    logistics: { bg: 'rgba(14,165,233,0.1)', text: '#0ea5e9' },
-    payment: { bg: 'rgba(139,92,246,0.1)', text: '#8b5cf6' },
-    'after-sales': { bg: 'rgba(236,72,153,0.1)', text: '#ec4899' }
-  };
 
   function collectKnowledgePool() {
     var pool = [];
 
-    // 1. Custom KB entries
     customEntries.forEach(function (e) {
       pool.push({
         source: 'kb',
         title: e.question || '',
         content: e.answer || '',
-        keywords: (e.keywords || '') + ' ' + (e.productName || '') + ' ' + (e.brand || ''),
         searchText: (e.question + ' ' + e.answer + ' ' + (e.keywords || '') + ' ' + (e.productName || '') + ' ' + (e.brand || '')).toLowerCase()
       });
     });
 
-    // 2-6. Section content
     var sectionIds = ['faq', 'returns', 'logistics', 'payment', 'after-sales'];
     sectionIds.forEach(function (sid) {
       var section = document.getElementById(sid);
       if (!section) return;
 
-      // Info cards
       var cards = section.querySelectorAll('.info-card');
       cards.forEach(function (card) {
         var h4 = card.querySelector('h4');
@@ -2038,17 +2026,10 @@
         var content = '';
         ps.forEach(function (p) { content += p.textContent.trim() + '\n'; });
         if (title || content) {
-          pool.push({
-            source: sid,
-            title: title,
-            content: content.trim(),
-            keywords: '',
-            searchText: (title + ' ' + content).toLowerCase()
-          });
+          pool.push({ source: sid, title: title, content: content.trim(), searchText: (title + ' ' + content).toLowerCase() });
         }
       });
 
-      // FAQ items
       var faqItems = section.querySelectorAll('.faq-item');
       faqItems.forEach(function (item) {
         var q = item.querySelector('.q-text');
@@ -2056,17 +2037,10 @@
         var title = q ? q.textContent.trim() : '';
         var content = a ? a.textContent.trim() : '';
         if (title || content) {
-          pool.push({
-            source: sid,
-            title: title,
-            content: content,
-            keywords: '',
-            searchText: (title + ' ' + content).toLowerCase()
-          });
+          pool.push({ source: sid, title: title, content: content, searchText: (title + ' ' + content).toLowerCase() });
         }
       });
 
-      // Policy cards
       var policyCards = section.querySelectorAll('.policy-card');
       policyCards.forEach(function (card) {
         var h4 = card.querySelector('h4');
@@ -2075,17 +2049,10 @@
         var content = '';
         ps.forEach(function (p) { content += p.textContent.trim() + '\n'; });
         if (title || content) {
-          pool.push({
-            source: sid,
-            title: title,
-            content: content.trim(),
-            keywords: '',
-            searchText: (title + ' ' + content).toLowerCase()
-          });
+          pool.push({ source: sid, title: title, content: content.trim(), searchText: (title + ' ' + content).toLowerCase() });
         }
       });
 
-      // Pay cards
       var payCards = section.querySelectorAll('.pay-card');
       payCards.forEach(function (card) {
         var h4 = card.querySelector('h4');
@@ -2096,45 +2063,25 @@
         if (fee) content += fee.textContent.trim() + '\n';
         ps.forEach(function (p) { content += p.textContent.trim() + '\n'; });
         if (title || content) {
-          pool.push({
-            source: sid,
-            title: title,
-            content: content.trim(),
-            keywords: '',
-            searchText: (title + ' ' + content).toLowerCase()
-          });
+          pool.push({ source: sid, title: title, content: content.trim(), searchText: (title + ' ' + content).toLowerCase() });
         }
       });
 
-      // Callout content
       var callouts = section.querySelectorAll('.callout .co-body');
       callouts.forEach(function (co) {
         var content = co.textContent.trim();
         if (content.length > 10) {
-          pool.push({
-            source: sid,
-            title: '',
-            content: content,
-            keywords: '',
-            searchText: content.toLowerCase()
-          });
+          pool.push({ source: sid, title: '', content: content, searchText: content.toLowerCase() });
         }
       });
 
-      // KB table rows
       var tableRows = section.querySelectorAll('.kb-table tr');
       tableRows.forEach(function (row) {
         var cells = row.querySelectorAll('td, th');
         var text = '';
         cells.forEach(function (c) { text += c.textContent.trim() + ' '; });
         if (text.trim().length > 3) {
-          pool.push({
-            source: sid,
-            title: '',
-            content: text.trim(),
-            keywords: '',
-            searchText: text.toLowerCase()
-          });
+          pool.push({ source: sid, title: '', content: text.trim(), searchText: text.toLowerCase() });
         }
       });
     });
@@ -2142,131 +2089,326 @@
     return pool;
   }
 
-  function tokenize(text) {
-    var tokens = [];
-    var lower = text.toLowerCase();
-    // Split by punctuation and spaces to get phrases
-    var phrases = lower.split(/[，。！？、；：\s,.\!?;:\n\r]+/).filter(function (p) { return p.length > 0; });
-    phrases.forEach(function (phrase) {
-      if (phrase.length === 1) return;
-      tokens.push(phrase);
-      // For Chinese text (contains CJK chars), generate bigrams
-      if (/[\u4e00-\u9fa5]/.test(phrase) && phrase.length > 2) {
-        for (var i = 0; i < phrase.length - 1; i++) {
-          var bigram = phrase.substring(i, i + 2);
-          if (bigram.length === 2) tokens.push(bigram);
-        }
-      }
-    });
-    return tokens;
+  function shuffleArr(arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+    }
+    return a;
   }
 
-  function generateRecommendedScripts() {
-    var input = document.getElementById('consumerQuestionInput');
-    var resultsEl = document.getElementById('crpResults');
-    if (!input || !resultsEl) return;
+  function truncateStr(str, maxLen) {
+    if (!str) return '';
+    str = str.replace(/\n+/g, ' ').trim();
+    return str.length > maxLen ? str.substring(0, maxLen) + '...' : str;
+  }
 
-    var question = input.value.trim();
-    if (!question) {
-      resultsEl.innerHTML = '<div class="crp-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>请先输入消费者的问题</div>';
-      return;
-    }
+  function splitSentences(text) {
+    if (!text) return [];
+    return text.split(/[。\n！？；]/).filter(function (s) { return s.trim().length > 8; }).map(function (s) { return s.trim(); });
+  }
 
+  var examQuestions = [];
+  var examAnswers = {};
+
+  function generateExamQuestions() {
     var pool = collectKnowledgePool();
-    var tokens = tokenize(question);
+    var usable = pool.filter(function (item) {
+      return item.content && item.content.length > 20 && item.title && item.title.length > 2;
+    });
 
-    if (tokens.length === 0) {
-      resultsEl.innerHTML = '<div class="crp-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>无法识别问题关键词，请输入更详细的问题</div>';
-      return;
+    if (usable.length < 4) {
+      return null;
     }
 
-    var scored = pool.map(function (item) {
-      var score = 0;
-      tokens.forEach(function (token) {
-        var isBigram = token.length === 2 && /[\u4e00-\u9fa5]/.test(token);
-        var weight = isBigram ? 0.5 : 2;
-        if (item.searchText.indexOf(token) !== -1) score += weight;
-        if (item.title && item.title.toLowerCase().indexOf(token) !== -1) score += weight * 1.5;
-        if (item.keywords && item.keywords.toLowerCase().indexOf(token) !== -1) score += weight * 1.2;
-      });
-      return { item: item, score: Math.round(score * 10) / 10 };
-    }).filter(function (r) { return r.score > 0; })
-      .sort(function (a, b) { return b.score - a.score; })
-      .slice(0, 5);
+    usable = shuffleArr(usable);
+    var questions = [];
+    var count = Math.min(10, usable.length);
+    var poolFiltered = pool.filter(function (item) {
+      return item.content && item.content.length > 15;
+    });
 
-    if (scored.length === 0) {
-      resultsEl.innerHTML = '<div class="crp-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>未找到匹配的知识内容，请尝试用不同的关键词描述问题</div>';
-      return;
+    for (var i = 0; i < count; i++) {
+      var item = usable[i];
+      if (i % 3 === 2) {
+        questions.push(makeMultipleChoice(item, poolFiltered, i));
+      } else {
+        questions.push(makeSingleChoice(item, poolFiltered, i));
+      }
     }
 
-    var html = '';
-    scored.forEach(function (r, idx) {
-      var item = r.item;
-      var tagColor = SOURCE_COLORS[item.source] || { bg: 'rgba(107,114,128,0.1)', text: '#6b7280' };
-      var sourceLabel = SOURCE_TAGS[item.source] || item.source;
-      var title = item.title ? item.title : '相关内容';
-      var body = item.content || '';
-      if (body.length > 500) body = body.substring(0, 500) + '...';
+    return questions;
+  }
 
-      html += '<div class="crp-result-card" data-crp-idx="' + idx + '">';
-      html += '<div class="crp-result-head">';
-      html += '<span class="crp-result-tag" style="background:' + tagColor.bg + ';color:' + tagColor.text + '">' + sourceLabel + '</span>';
-      html += '<button class="crp-result-copy" data-copy-text="' + encodeURIComponent(body) + '">';
-      html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
-      html += '<span>复制话术</span>';
-      html += '</button>';
+  function makeSingleChoice(item, pool, currentIdx) {
+    var others = pool.filter(function (p) {
+      return p.title !== item.title && p.content !== item.content;
+    });
+    others = shuffleArr(others).slice(0, 3);
+
+    while (others.length < 3) {
+      var fake = { content: '暂无相关内容信息' };
+      others.push(fake);
+    }
+
+    var correctText = truncateStr(item.content, 100);
+    var options = others.map(function (o) { return truncateStr(o.content, 100); });
+    options.push(correctText);
+    options = shuffleArr(options);
+    var correctIdx = options.indexOf(correctText);
+
+    return {
+      type: 'single',
+      source: item.source,
+      question: '关于「' + item.title + '」，以下哪个描述是正确的？',
+      options: options,
+      correct: [correctIdx],
+      explanation: item.content
+    };
+  }
+
+  function makeMultipleChoice(item, pool, currentIdx) {
+    var sentences = splitSentences(item.content);
+    var others = pool.filter(function (p) {
+      return p.title !== item.title && p.content !== item.content;
+    });
+    others = shuffleArr(others);
+
+    var correctOpts = sentences.slice(0, 2).map(function (s) { return truncateStr(s, 80); });
+    while (correctOpts.length < 1) {
+      correctOpts.push(truncateStr(item.content, 60));
+    }
+
+    var wrongOpts = [];
+    for (var j = 0; j < others.length && wrongOpts.length < 2; j++) {
+      var otherSentences = splitSentences(others[j].content);
+      if (otherSentences.length > 0) {
+        wrongOpts.push(truncateStr(otherSentences[0], 80));
+      }
+    }
+    while (wrongOpts.length < 2) {
+      wrongOpts.push('此项描述与本题无关');
+    }
+
+    while (correctOpts.length < 2) {
+      correctOpts.push(truncateStr(sentences[correctOpts.length] || item.content, 80));
+    }
+
+    var targetCorrect = 1 + Math.floor(Math.random() * 2);
+    correctOpts = correctOpts.slice(0, targetCorrect);
+    wrongOpts = wrongOpts.slice(0, 4 - targetCorrect);
+
+    var options = correctOpts.concat(wrongOpts);
+    options = shuffleArr(options);
+    var correctIndices = correctOpts.map(function (opt) { return options.indexOf(opt); }).filter(function (idx) { return idx >= 0; });
+
+    return {
+      type: 'multiple',
+      source: item.source,
+      question: '关于「' + item.title + '」，以下哪些说法是正确的？（多选）',
+      options: options,
+      correct: correctIndices,
+      explanation: item.content
+    };
+  }
+
+  function renderExam(questions) {
+    var container = document.getElementById('examContainer');
+    if (!container) return;
+
+    var html = '<div class="exam-progress-bar"><div class="exam-progress-bar-fill" style="width:0%"></div></div>';
+    html += '<div id="examQuestions">';
+
+    questions.forEach(function (q, idx) {
+      var typeLabel = q.type === 'single' ? '单选题' : '多选题';
+      var typeClass = q.type === 'single' ? 'single' : 'multi';
+      var sourceLabel = SOURCE_TAGS[q.source] || q.source;
+      var optLabels = ['A', 'B', 'C', 'D', 'E', 'F'];
+
+      html += '<div class="exam-question-card" data-q-idx="' + idx + '">';
+      html += '<div class="exam-q-header">';
+      html += '<div class="exam-q-num">' + (idx + 1) + '</div>';
+      html += '<span class="exam-q-type ' + typeClass + '">' + typeLabel + '</span>';
+      html += '<span class="exam-q-source">来源：' + escapeHtml(sourceLabel) + '</span>';
       html += '</div>';
-      html += '<div class="crp-result-body">' + escapeHtml(title) + (body ? '\n\n' + escapeHtml(body) : '') + '</div>';
-      html += '<div class="crp-result-source">来源：' + sourceLabel + ' · 匹配度：' + r.score + ' 分</div>';
+      html += '<div class="exam-q-text">' + escapeHtml(q.question) + '</div>';
+      html += '<div class="exam-options">';
+      q.options.forEach(function (opt, oIdx) {
+        html += '<div class="exam-option" data-q-idx="' + idx + '" data-opt-idx="' + oIdx + '">';
+        html += '<div class="opt-label">' + optLabels[oIdx] + '</div>';
+        html += '<div class="opt-text">' + escapeHtml(opt) + '</div>';
+        html += '</div>';
+      });
+      html += '</div>';
       html += '</div>';
     });
 
-    resultsEl.innerHTML = html;
+    html += '</div>';
+    html += '<div class="exam-actions">';
+    html += '<button class="btn-primary" id="examSubmitBtn" style="padding:0.6rem 1.4rem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;margin-right:0.3rem;vertical-align:middle"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>提交试卷</button>';
+    html += '<button class="btn-outline" id="examCancelBtn" style="padding:0.6rem 1.4rem">放弃考试</button>';
+    html += '</div>';
 
-    resultsEl.querySelectorAll('.crp-result-copy').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var text = decodeURIComponent(btn.getAttribute('data-copy-text'));
-        if (navigator.clipboard) {
-          navigator.clipboard.writeText(text).then(function () {
-            var span = btn.querySelector('span');
-            var orig = span ? span.textContent : '';
-            if (span) span.textContent = '已复制';
-            setTimeout(function () { if (span) span.textContent = orig; }, 2000);
+    container.innerHTML = html;
+
+    container.querySelectorAll('.exam-option').forEach(function (opt) {
+      opt.addEventListener('click', function () {
+        var qIdx = parseInt(opt.getAttribute('data-q-idx'));
+        var oIdx = parseInt(opt.getAttribute('data-opt-idx'));
+        var q = questions[qIdx];
+
+        if (q.type === 'single') {
+          container.querySelectorAll('.exam-option[data-q-idx="' + qIdx + '"]').forEach(function (o) {
+            o.classList.remove('selected');
           });
+          opt.classList.add('selected');
+          examAnswers[qIdx] = [oIdx];
         } else {
-          var ta = document.createElement('textarea');
-          ta.value = text;
-          document.body.appendChild(ta);
-          ta.select();
-          document.execCommand('copy');
-          document.body.removeChild(ta);
-          var span2 = btn.querySelector('span');
-          var orig2 = span2 ? span2.textContent : '';
-          if (span2) span2.textContent = '已复制';
-          setTimeout(function () { if (span2) span2.textContent = orig2; }, 2000);
+          opt.classList.toggle('selected');
+          if (!examAnswers[qIdx]) examAnswers[qIdx] = [];
+          var arr = examAnswers[qIdx];
+          var pos = arr.indexOf(oIdx);
+          if (pos >= 0) arr.splice(pos, 1);
+          else arr.push(oIdx);
         }
       });
     });
+
+    var submitBtn = document.getElementById('examSubmitBtn');
+    if (submitBtn) submitBtn.addEventListener('click', function () { submitExam(questions); });
+    var cancelBtn = document.getElementById('examCancelBtn');
+    if (cancelBtn) cancelBtn.addEventListener('click', resetExam);
   }
 
-  var crpGenerateBtn = document.getElementById('crpGenerateBtn');
-  var crpClearBtn = document.getElementById('crpClearBtn');
-  var consumerQuestionInput = document.getElementById('consumerQuestionInput');
+  function submitExam(questions) {
+    var unanswered = 0;
+    questions.forEach(function (q, idx) {
+      if (!examAnswers[idx] || examAnswers[idx].length === 0) unanswered++;
+    });
 
-  if (crpGenerateBtn) crpGenerateBtn.addEventListener('click', generateRecommendedScripts);
-  if (crpClearBtn) {
-    crpClearBtn.addEventListener('click', function () {
-      if (consumerQuestionInput) consumerQuestionInput.value = '';
-      var resultsEl = document.getElementById('crpResults');
-      if (resultsEl) {
-        resultsEl.innerHTML = '<div class="crp-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>粘贴消费者问题后点击"生成推荐话术"，系统将从知识库中匹配相关内容</div>';
+    if (unanswered > 0) {
+      var proceed = confirm('还有 ' + unanswered + ' 道题未作答，确定要提交吗？');
+      if (!proceed) return;
+    }
+
+    var correctCount = 0;
+    var totalScore = 0;
+    var perScore = Math.round(100 / questions.length);
+
+    questions.forEach(function (q, idx) {
+      var userAns = (examAnswers[idx] || []).slice().sort(function (a, b) { return a - b; });
+      var correctAns = q.correct.slice().sort(function (a, b) { return a - b; });
+      var isCorrect = JSON.stringify(userAns) === JSON.stringify(correctAns);
+      if (isCorrect) { correctCount++; totalScore += perScore; }
+    });
+
+    renderExamResult(questions, correctCount, totalScore, perScore);
+  }
+
+  function renderExamResult(questions, correctCount, totalScore, perScore) {
+    var container = document.getElementById('examContainer');
+    if (!container) return;
+    var passed = totalScore >= 60;
+    var wrongCount = questions.length - correctCount;
+    var optLabels = ['A', 'B', 'C', 'D', 'E', 'F'];
+
+    var html = '<div class="exam-result-summary">';
+    html += '<div class="exam-score-circle ' + (passed ? 'pass' : 'fail') + '">';
+    html += '<div class="score-num">' + totalScore + '</div>';
+    html += '<div class="score-label">' + (passed ? '恭喜通过' : '未通过') + '</div>';
+    html += '</div>';
+    html += '<div class="exam-result-stats">';
+    html += '<div class="exam-result-stat"><div class="val" style="color:#22c55e">' + correctCount + '</div><div class="lbl">答对</div></div>';
+    html += '<div class="exam-result-stat"><div class="val" style="color:#ef4444">' + wrongCount + '</div><div class="lbl">答错</div></div>';
+    html += '<div class="exam-result-stat"><div class="val" style="color:#6366f1">' + questions.length + '</div><div class="lbl">总题数</div></div>';
+    html += '</div>';
+    html += '</div>';
+
+    html += '<h4 style="font-size:0.9rem;font-weight:700;color:var(--dark);margin:1rem 0 0.5rem">答题回顾</h4>';
+
+    questions.forEach(function (q, idx) {
+      var userAns = (examAnswers[idx] || []).slice().sort(function (a, b) { return a - b; });
+      var correctAns = q.correct.slice().sort(function (a, b) { return a - b; });
+      var isCorrect = JSON.stringify(userAns) === JSON.stringify(correctAns);
+
+      html += '<div class="exam-review-card ' + (isCorrect ? 'correct' : 'wrong') + '">';
+      html += '<div class="exam-review-q">' + (idx + 1) + '. ' + escapeHtml(q.question) + '</div>';
+
+      if (!isCorrect) {
+        var userLabels = userAns.map(function (i) { return optLabels[i]; }).join('、') || '未作答';
+        var correctLabels = correctAns.map(function (i) { return optLabels[i]; }).join('、');
+        html += '<div class="exam-review-ans"><span class="tag wrong">你的答案：</span>' + escapeHtml(userLabels) + '</div>';
+        html += '<div class="exam-review-ans"><span class="tag right">正确答案：</span>' + escapeHtml(correctLabels) + '</div>';
+        html += '<div class="exam-review-explanation">' + escapeHtml(truncateStr(q.explanation, 200)) + '</div>';
+      } else {
+        html += '<div class="exam-review-ans"><span class="tag right">回答正确</span></div>';
       }
+
+      html += '</div>';
     });
+
+    html += '<div class="exam-actions">';
+    html += '<button class="btn-primary" id="examRetryBtn" style="padding:0.6rem 1.4rem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;margin-right:0.3rem;vertical-align:middle"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>重新考试</button>';
+    html += '</div>';
+
+    container.innerHTML = html;
+
+    var retryBtn = document.getElementById('examRetryBtn');
+    if (retryBtn) retryBtn.addEventListener('click', startExam);
   }
-  if (consumerQuestionInput) {
-    consumerQuestionInput.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); generateRecommendedScripts(); }
+
+  function startExam() {
+    examAnswers = {};
+    var questions = generateExamQuestions();
+    if (!questions) {
+      var container = document.getElementById('examContainer');
+      if (container) {
+        container.innerHTML = '<div class="exam-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>知识库内容不足，至少需要4条带标题和内容的知识条目才能生成考题。请先在知识管理中添加更多内容。</div>';
+      }
+      return;
+    }
+    examQuestions = questions;
+    renderExam(questions);
+  }
+
+  function resetExam() {
+    examQuestions = [];
+    examAnswers = {};
+    var container = document.getElementById('examContainer');
+    if (!container) return;
+    container.innerHTML =
+      '<div class="exam-start-panel" id="examStartPanel">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:48px;height:48px;color:#6366f1;margin:0 auto 1rem;display:block"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 13l2 2 4-4"/></svg>' +
+        '<p style="font-size:0.9rem;color:var(--muted);max-width:400px;margin:0 auto 1rem">点击下方按钮开始考试，系统将从知识管理、常见问题、退换货政策、物流配送、支付方式、售后服务中随机生成题目</p>' +
+        '<div class="exam-info">' +
+          '<div class="exam-stat"><div class="num" id="examPoolCount">-</div><div class="label">知识条目</div></div>' +
+          '<div class="exam-stat"><div class="num">10</div><div class="label">考试题数</div></div>' +
+          '<div class="exam-stat"><div class="num">60</div><div class="label">合格分数</div></div>' +
+        '</div>' +
+        '<button class="btn-primary" id="examStartBtn" style="padding:0.7rem 2rem;font-size:0.9rem">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;margin-right:0.3rem;vertical-align:middle"><polygon points="5 3 19 12 5 21 5 3"/></svg>开始考试' +
+        '</button>' +
+      '</div>';
+    updatePoolCount();
+    bindStartBtn();
+  }
+
+  function updatePoolCount() {
+    var pool = collectKnowledgePool();
+    var usable = pool.filter(function (item) {
+      return item.content && item.content.length > 20 && item.title && item.title.length > 2;
     });
+    var el = document.getElementById('examPoolCount');
+    if (el) el.textContent = usable.length;
   }
+
+  function bindStartBtn() {
+    var btn = document.getElementById('examStartBtn');
+    if (btn) btn.addEventListener('click', startExam);
+  }
+
+  bindStartBtn();
+  updatePoolCount();
 
 })();
