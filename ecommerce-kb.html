@@ -2362,6 +2362,67 @@
       margin-top: 0.5rem; padding: 0.5rem 0.8rem; background: var(--bg-soft);
       border-radius: 8px; font-size: 0.8rem; color: var(--dark); line-height: 1.5;
     }
+
+    /* === Consumer Role-Play (Recommended Scripts) === */
+    .consumer-rp {
+      margin-top: 2rem;
+      background: linear-gradient(135deg, rgba(99,102,241,0.04), rgba(236,72,153,0.04));
+      border: 1px solid rgba(99,102,241,0.15);
+      border-radius: 16px;
+      padding: 1.5rem;
+    }
+    .consumer-rp-head { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.5rem; }
+    .consumer-rp-head .crp-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(236,72,153,0.12));
+    }
+    .consumer-rp-head .crp-icon svg { width: 20px; height: 20px; color: #6366f1; }
+    .consumer-rp-head h4 { font-size: 1.05rem; font-weight: 700; color: var(--dark); }
+    .consumer-rp-head p { font-size: 0.8rem; color: var(--muted); margin-top: 0.15rem; }
+    .consumer-rp-input-area { margin-top: 1rem; }
+    .consumer-rp-input-area textarea {
+      width: 100%; min-height: 80px; padding: 0.8rem 1rem;
+      border: 1.5px solid var(--border); border-radius: 10px;
+      font-size: 0.9rem; font-family: var(--font); resize: vertical;
+      transition: border-color 0.2s; box-sizing: border-box;
+    }
+    .consumer-rp-input-area textarea:focus { outline: none; border-color: var(--primary); }
+    .consumer-rp-actions { display: flex; gap: 0.5rem; margin-top: 0.8rem; flex-wrap: wrap; }
+    .consumer-rp-results { margin-top: 1rem; display: flex; flex-direction: column; gap: 0.8rem; }
+    .crp-result-card {
+      background: #fff; border: 1px solid var(--border); border-radius: 12px;
+      padding: 1rem 1.2rem; transition: border-color 0.2s;
+    }
+    .crp-result-card:hover { border-color: var(--primary); }
+    .crp-result-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.5rem; }
+    .crp-result-tag {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      padding: 0.2rem 0.6rem; border-radius: 100px;
+      font-size: 0.72rem; font-weight: 600;
+    }
+    .crp-result-copy {
+      background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.15);
+      color: #6366f1; padding: 0.3rem 0.7rem; border-radius: 8px;
+      font-size: 0.76rem; font-weight: 600; cursor: pointer; font-family: var(--font);
+      display: flex; align-items: center; gap: 0.3rem; transition: all 0.2s;
+    }
+    .crp-result-copy:hover { background: rgba(99,102,241,0.15); }
+    .crp-result-copy svg { width: 13px; height: 13px; }
+    .crp-result-body {
+      font-size: 0.88rem; line-height: 1.6; color: var(--dark);
+      background: var(--bg-soft); border-radius: 8px; padding: 0.8rem 1rem;
+      white-space: pre-wrap; word-break: break-word;
+    }
+    .crp-result-source {
+      font-size: 0.74rem; color: var(--muted); margin-top: 0.5rem;
+      display: flex; align-items: center; gap: 0.3rem;
+    }
+    .crp-empty {
+      text-align: center; padding: 2rem 1rem; color: var(--muted);
+      font-size: 0.88rem;
+    }
+    .crp-empty svg { width: 32px; height: 32px; opacity: 0.3; margin-bottom: 0.5rem; display: block; margin: 0 auto 0.5rem; }
   </style>
 </head>
 <body>
@@ -2398,7 +2459,7 @@
         <a href="#logistics">物流配送</a>
         <a href="#payment">支付方式</a>
         <a href="#knowledge">知识管理</a>
-        <a href="#simulation">对话演练</a>
+        <a href="#simulation">知识考试</a>
       </nav>
       <div class="login-topbar-actions">
         <button class="login-change-btn" id="changePwdBtn" title="修改密码">
@@ -2515,7 +2576,7 @@
       <a href="#simulation" class="cat-card" data-cat="simulation">
         <div class="cat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 10h.01M12 10h.01M16 10h.01"/></svg></div>
         <div class="cat-body">
-          <h3>对话演练</h3>
+          <h3>知识考试</h3>
           <p>模拟客户对话，提升客服话术熟练度</p>
         </div>
         <span class="cat-count">5 场景</span>
@@ -2536,7 +2597,7 @@
         <li><a href="#after-sales" data-section="after-sales"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>售后服务</a></li>
         <li><a href="#knowledge" data-section="knowledge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>知识管理</a></li>
         <li><a href="#errors" data-section="errors"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>错误案例</a></li>
-        <li><a href="#simulation" data-section="simulation"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>对话演练</a></li>
+        <li><a href="#simulation" data-section="simulation"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>知识考试</a></li>
       </ul>
     </aside>
 
@@ -3369,98 +3430,18 @@ flowchart LR
       <section id="simulation" class="kb-section">
         <div class="section-head">
           <div class="sec-icon" style="background:rgba(236,72,153,0.1)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 10h.01M12 10h.01M16 10h.01"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/><line x1="12" y1="12" x2="12" y2="18"/></svg>
           </div>
           <div>
-            <h2>客服对话演练</h2>
-            <div class="sec-sub">模拟真实客户场景，练习客服话术，获得即时评分反馈</div>
+            <h2>客服知识考试</h2>
+            <div class="sec-sub">系统自动从知识库生成单选题和多选题，检验客服知识掌握程度</div>
           </div>
         </div>
 
         <div class="callout">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
           <div class="co-body">
-            <strong>使用方式：</strong>选择一个客户场景 → 系统模拟客户发送消息 → 您以客服身份回复 → 系统自动评估回复质量（关键词覆盖、服务态度、话术完整性）并给出评分 → 完成 3 轮对话后查看总结报告。
-          </div>
-        </div>
-
-        <div class="sim-layout">
-          <div class="sim-scenarios" id="simScenarios">
-            <button class="scenario-btn active" data-scenario="return">
-              <div class="sc-icon" style="background:rgba(249,115,22,0.1)"><svg viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></div>
-              <div class="sc-body"><h5>退货咨询</h5><p>客户想退货，需引导流程</p></div>
-            </button>
-            <button class="scenario-btn" data-scenario="logistics">
-              <div class="sc-icon" style="background:rgba(34,197,94,0.1)"><svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
-              <div class="sc-body"><h5>物流催单</h5><p>包裹迟迟未到</p></div>
-            </button>
-            <button class="scenario-btn" data-scenario="complaint">
-              <div class="sc-icon" style="background:rgba(239,68,68,0.1)"><svg viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
-              <div class="sc-body"><h5>质量投诉</h5><p>收到有缺陷商品</p></div>
-            </button>
-            <button class="scenario-btn" data-scenario="payment">
-              <div class="sc-icon" style="background:rgba(139,92,246,0.1)"><svg viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>
-              <div class="sc-body"><h5>支付问题</h5><p>支付失败需协助</p></div>
-            </button>
-            <button class="scenario-btn" data-scenario="invoice">
-              <div class="sc-icon" style="background:rgba(14,165,233,0.1)"><svg viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
-              <div class="sc-body"><h5>发票咨询</h5><p>需开具增值税发票</p></div>
-            </button>
-          </div>
-
-          <div class="sim-chat-panel">
-            <div class="sim-chat-header">
-              <div class="sch-left">
-                <div class="sch-avatar" id="simAvatar">客</div>
-                <div class="sch-info">
-                  <h5 id="simCustomerName">模拟客户</h5>
-                  <p id="simStatus">等待开始对话...</p>
-                </div>
-              </div>
-              <div class="sch-score">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                <span id="simScore">0</span>分
-              </div>
-            </div>
-
-            <div class="sim-messages" id="simMessages">
-              <div class="sim-start-overlay" id="simStartOverlay">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                <h5>对话演练</h5>
-                <p>从左侧选择一个客户场景，点击"开始演练"即可模拟真实客服对话。系统将根据您的回复质量进行评分。</p>
-                <button class="btn-primary" id="simStartBtn" style="margin-top:1rem">开始演练</button>
-              </div>
-            </div>
-
-            <div class="sim-input-area" id="simInputArea" style="display:none">
-              <div class="sim-suggest-panel" id="simSuggestPanel" style="display:none">
-                <div class="sim-suggest-header">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
-                  <span>建议话术 · 参考回复</span>
-                  <button class="sim-suggest-close" id="simSuggestClose" title="关闭">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                  </button>
-                </div>
-                <div class="sim-suggest-body" id="simSuggestBody"></div>
-                <div class="sim-suggest-actions">
-                  <button class="sim-use-btn" id="simUseBtn">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-                    <span>使用此话术</span>
-                  </button>
-                </div>
-              </div>
-              <div class="sim-input-row">
-                <button class="sim-hint-btn" id="simHintBtn" title="查看建议话术">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg>
-                  <span>建议话术</span>
-                </button>
-                <textarea id="simInput" placeholder="以客服身份输入回复，或点击左侧"建议话术"查看参考..." rows="1"></textarea>
-                <button class="sim-send-btn" id="simSendBtn">
-                  <span>发送</span>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                </button>
-              </div>
-            </div>
+            <strong>使用方式：</strong>点击"开始考试" → 系统从知识管理、常见问题、退换货政策、物流配送、支付方式、售后服务中自动生成10道题（含单选题和多选题） → 作答完成后提交 → 查看得分和答题回顾。
           </div>
         </div>
 
@@ -3492,6 +3473,34 @@ flowchart LR
             </div>
           </div>
         </div>
+
+        <!-- Consumer Question → Recommended Scripts -->
+        <div class="consumer-rp">
+          <div class="consumer-rp-head">
+            <div class="crp-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div>
+              <h4>消费者问题 → 推荐话术</h4>
+              <p>粘贴消费者的问题，系统自动从知识库中匹配相关内容并生成推荐回复</p>
+            </div>
+          </div>
+          <div class="consumer-rp-input-area">
+            <textarea id="consumerQuestionInput" placeholder="粘贴消费者的问题，例如：你好，我买的手机收到发现有划痕，想退货怎么操作？"></textarea>
+            <div class="consumer-rp-actions">
+              <button class="btn-primary" id="crpGenerateBtn" style="padding:0.6rem 1.4rem">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;margin-right:0.3rem;vertical-align:middle"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>生成推荐话术
+              </button>
+              <button class="btn-outline" id="crpClearBtn" style="padding:0.6rem 1.4rem">清空</button>
+            </div>
+          </div>
+          <div class="consumer-rp-results" id="crpResults">
+            <div class="crp-empty">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+              粘贴消费者问题后点击"生成推荐话术"，系统将从知识库中匹配相关内容
+            </div>
+          </div>
+        </div>
       </section>
 
     </main>
@@ -3518,7 +3527,7 @@ flowchart LR
         <ul>
           <li><a href="#after-sales">售后服务</a></li>
           <li><a href="#knowledge">知识管理</a></li>
-          <li><a href="#simulation">对话演练</a></li>
+          <li><a href="#simulation">知识考试</a></li>
           <li><a href="#">意见反馈</a></li>
         </ul>
       </div>
