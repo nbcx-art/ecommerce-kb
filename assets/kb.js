@@ -1571,6 +1571,8 @@
         source: 'kb',
         title: e.question || '',
         content: e.answer || '',
+        productName: e.productName || '',
+        merchantCode: e.merchantCode || '',
         searchText: (e.question + ' ' + e.answer + ' ' + (e.keywords || '') + ' ' + (e.productName || '') + ' ' + (e.brand || '')).toLowerCase()
       });
     });
@@ -1744,8 +1746,8 @@
     }
 
     if (mutations.length === 0) {
-      var prefix = ['根据规定，', '通常情况下，', '一般情况下，', '在特殊情况下，', '请注意：'];
-      mutations.push(prefix[Math.floor(Math.random() * prefix.length)] + text);
+      var prefixes = ['根据规定，', '通常情况下，', '一般情况下，', '在特殊情况下，', '请注意：'];
+      prefixes.forEach(function (p) { mutations.push(p + text); });
     }
 
     return mutations;
@@ -1764,7 +1766,9 @@
       }
     }
 
-    while (wrongOptions.length < 3) {
+    var attempts = 0;
+    while (wrongOptions.length < 3 && attempts < 20) {
+      attempts++;
       var extra = mutateText(correctText);
       for (var e = 0; e < extra.length && wrongOptions.length < 3; e++) {
         var t = truncateStr(extra[e], 120);
@@ -1803,7 +1807,9 @@
       correctIndices.push(allOptions.length - 1);
     });
 
-    while (allOptions.length < 4) {
+    var mcAttempts = 0;
+    while (allOptions.length < 4 && mcAttempts < 20) {
+      mcAttempts++;
       var src = sentences.length > 0 ? sentences[Math.floor(Math.random() * sentences.length)] : item.content;
       var muts = mutateText(truncateStr(src, 100));
       if (muts.length > 0) {
@@ -1919,23 +1925,22 @@
     }
 
     var correctCount = 0;
-    var totalScore = 0;
-    var perScore = Math.round(100 / questions.length);
 
     questions.forEach(function (q, idx) {
       var userAns = (examAnswers[idx] || []).slice().sort(function (a, b) { return a - b; });
       var correctAns = q.correct.slice().sort(function (a, b) { return a - b; });
       var isCorrect = JSON.stringify(userAns) === JSON.stringify(correctAns);
-      if (isCorrect) { correctCount++; totalScore += perScore; }
+      if (isCorrect) { correctCount++; }
     });
 
-    renderExamResult(questions, correctCount, totalScore, perScore);
+    var totalScore = Math.round((correctCount / questions.length) * 100);
+    renderExamResult(questions, correctCount, totalScore);
   }
 
-  function renderExamResult(questions, correctCount, totalScore, perScore) {
+  function renderExamResult(questions, correctCount, totalScore) {
     var container = document.getElementById('examContainer');
     if (!container) return;
-    var passed = totalScore >= 60;
+    var passed = totalScore >= 90;
     var wrongCount = questions.length - correctCount;
     var optLabels = ['A', 'B', 'C', 'D', 'E', 'F'];
 
@@ -1952,7 +1957,9 @@
     html += '<div class="exam-result-stat"><div class="val" style="color:#22c55e">' + correctCount + '</div><div class="lbl">答对</div></div>';
     html += '<div class="exam-result-stat"><div class="val" style="color:#ef4444">' + wrongCount + '</div><div class="lbl">答错</div></div>';
     html += '<div class="exam-result-stat"><div class="val" style="color:#6366f1">' + questions.length + '</div><div class="lbl">总题数</div></div>';
+    html += '<div class="exam-result-stat"><div class="val" style="color:' + (passed ? '#22c55e' : '#ef4444') + '">' + totalScore + '%</div><div class="lbl">准确率</div></div>';
     html += '</div>';
+    html += '<div style="text-align:center;font-size:0.78rem;color:var(--muted);margin-top:0.6rem">通过标准：准确率 ≥ 90%</div>';
     html += '</div>';
 
     html += '<h4 style="font-size:0.9rem;font-weight:700;color:var(--dark);margin:1rem 0 0.5rem">答题回顾</h4>';
@@ -1979,13 +1986,37 @@
     });
 
     html += '<div class="exam-actions">';
-    html += '<button class="btn-primary" id="examRetryBtn" style="padding:0.6rem 1.4rem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;margin-right:0.3rem;vertical-align:middle"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>重新考试</button>';
+    html += '<button class="btn-primary" id="examRefreshBtn" style="padding:0.6rem 1.4rem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;margin-right:0.3rem;vertical-align:middle"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>刷新题目重新作答</button>';
+    html += '<button class="btn-secondary" id="examRetryBtn" style="padding:0.6rem 1.4rem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;margin-right:0.3rem;vertical-align:middle"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>返回重新填写</button>';
     html += '</div>';
 
     container.innerHTML = html;
 
+    var refreshBtn = document.getElementById('examRefreshBtn');
+    if (refreshBtn) refreshBtn.addEventListener('click', refreshExamQuestions);
     var retryBtn = document.getElementById('examRetryBtn');
     if (retryBtn) retryBtn.addEventListener('click', resetExam);
+  }
+
+  function refreshExamQuestions() {
+    examAnswers = {};
+    var questions = generateExamQuestions();
+    if (!questions) {
+      var container = document.getElementById('examContainer');
+      if (container) {
+        container.innerHTML = '<div class="exam-empty">知识库内容不足，无法生成新题目。请先在知识管理中添加更多内容后，点击下方"返回重新填写"重试。</div>';
+      }
+      return;
+    }
+    examQuestions = questions;
+    renderExam(questions);
+    var container = document.getElementById('examContainer');
+    if (container) {
+      var banner = document.createElement('div');
+      banner.style.cssText = 'background:#ecfdf5;border:1px solid #10b981;color:#065f46;padding:0.5rem 0.8rem;border-radius:8px;font-size:0.8rem;margin-bottom:0.8rem;text-align:center';
+      banner.textContent = '已刷新题目，考生：' + examStudentName + '　日期：' + examStudentDate;
+      container.insertBefore(banner, container.firstChild);
+    }
   }
 
   var examStudentName = '';
@@ -2038,11 +2069,11 @@
     container.innerHTML =
       '<div class="exam-start-panel" id="examStartPanel">' +
         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:48px;height:48px;color:#6366f1;margin:0 auto 1rem;display:block"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 13l2 2 4-4"/></svg>' +
-        '<p style="font-size:0.9rem;color:var(--muted);max-width:400px;margin:0 auto 1rem">系统将从知识管理、常见问题、退换货政策、物流配送、支付方式、售后服务中随机生成15道选择题</p>' +
+        '<p style="font-size:0.9rem;color:var(--muted);max-width:400px;margin:0 auto 1rem">系统将从知识管理、常见问题、退换货政策、物流配送、支付方式、售后服务中随机生成15道选择题，准确率达到90%即为通过</p>' +
         '<div class="exam-info">' +
           '<div class="exam-stat"><div class="num" id="examPoolCount">-</div><div class="label">知识条目</div></div>' +
           '<div class="exam-stat"><div class="num">15</div><div class="label">考试题数</div></div>' +
-          '<div class="exam-stat"><div class="num">60</div><div class="label">合格分数</div></div>' +
+          '<div class="exam-stat"><div class="num">90</div><div class="label">合格分数</div></div>' +
         '</div>' +
         '<div style="max-width:360px;margin:1.2rem auto 0;display:flex;flex-direction:column;gap:0.8rem">' +
           '<div style="text-align:left">' +
@@ -2189,6 +2220,14 @@
       html += '</button>';
       html += '</div>';
       html += '<div class="crp-result-body">' + escapeHtml(title) + (body ? '\n\n' + escapeHtml(body) : '') + '</div>';
+      if (item.source === 'kb') {
+        var pn = item.productName || '通用';
+        var mc = item.merchantCode || '通用';
+        html += '<div class="crp-result-meta">';
+        html += '<span class="crp-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;vertical-align:-2px;margin-right:3px"><path d="M20 7l-8-4-8 4 8 4 8-4z"/><path d="M4 12l8 4 8-4"/><path d="M4 17l8 4 8-4"/></svg>商品名称：<strong>' + escapeHtml(pn) + '</strong></span>';
+        html += '<span class="crp-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;vertical-align:-2px;margin-right:3px"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6v6H9z"/></svg>商家编码：<strong>' + escapeHtml(mc) + '</strong></span>';
+        html += '</div>';
+      }
       html += '<div class="crp-result-source">来源：' + sourceLabel + ' · 匹配度：' + r.score + ' 分</div>';
       html += '</div>';
     });
