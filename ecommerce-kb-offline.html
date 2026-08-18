@@ -5977,6 +5977,64 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     }
   }
 
+  function showDataToast(msg, type) {
+    var existing = document.getElementById('dataToast');
+    if (existing) existing.remove();
+    var toast = document.createElement('div');
+    toast.id = 'dataToast';
+    toast.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9999;padding:0.8rem 1.5rem;border-radius:10px;font-size:0.85rem;font-family:var(--font);box-shadow:0 4px 20px rgba(0,0,0,0.15);transition:opacity 0.3s;max-width:90vw;text-align:center;';
+    if (type === 'error') {
+      toast.style.background = '#fef2f2';
+      toast.style.color = '#dc2626';
+      toast.style.border = '1px solid #fecaca';
+    } else if (type === 'success') {
+      toast.style.background = '#f0fdf4';
+      toast.style.color = '#16a34a';
+      toast.style.border = '1px solid #bbf7d0';
+    } else {
+      toast.style.background = '#eff6ff';
+      toast.style.color = '#2563eb';
+      toast.style.border = '1px solid #bfdbfe';
+    }
+    toast.textContent = msg;
+    document.body.appendChild(toast);
+    setTimeout(function () { toast.style.opacity = '0'; }, 3000);
+    setTimeout(function () { if (toast.parentNode) toast.remove(); }, 3500);
+  }
+
+  function showTokenModal(callback) {
+    var existing = document.getElementById('tokenModalOverlay');
+    if (existing) existing.remove();
+    var overlay = document.createElement('div');
+    overlay.id = 'tokenModalOverlay';
+    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:10000;display:flex;align-items:center;justify-content:center;';
+    overlay.innerHTML = '<div style="background:#fff;border-radius:16px;padding:2rem;max-width:500px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3);font-family:var(--font)">' +
+      '<h3 style="margin:0 0 0.5rem;font-size:1.1rem;color:var(--dark)">发布数据到云端</h3>' +
+      '<p style="margin:0 0 1rem;font-size:0.82rem;color:var(--muted)">请输入 GitHub Token（仅首次输入，之后自动记住）</p>' +
+      '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:0.8rem;margin-bottom:1rem;font-size:0.78rem;color:#64748b;line-height:1.5">' +
+      '<strong style="color:#475569">Token 权限要求：</strong><br>Contents: Read and write<br><br>' +
+      '<a href="https://github.com/settings/personal-access-tokens/new" target="_blank" style="color:#6366f1;text-decoration:none">点击创建 Token →</a>' +
+      '</div>' +
+      '<input type="text" id="tokenModalInput" placeholder="github_pat_..." style="width:100%;padding:0.6rem 0.8rem;border:1px solid #cbd5e1;border-radius:8px;font-size:0.85rem;font-family:monospace;box-sizing:border-box;margin-bottom:1rem">' +
+      '<div style="display:flex;gap:0.8rem;justify-content:flex-end">' +
+      '<button id="tokenModalCancel" style="padding:0.5rem 1.2rem;border:1px solid #cbd5e1;background:#fff;border-radius:8px;cursor:pointer;font-size:0.82rem;font-family:var(--font);color:#64748b">取消</button>' +
+      '<button id="tokenModalOk" style="padding:0.5rem 1.2rem;background:#6366f1;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:0.82rem;font-family:var(--font)">确认发布</button>' +
+      '</div></div>';
+    document.body.appendChild(overlay);
+    var input = document.getElementById('tokenModalInput');
+    input.focus();
+    document.getElementById('tokenModalCancel').onclick = function () { overlay.remove(); };
+    document.getElementById('tokenModalOk').onclick = function () {
+      var val = input.value.trim();
+      if (!val) { input.style.borderColor = '#ef4444'; return; }
+      overlay.remove();
+      callback(val);
+    };
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') document.getElementById('tokenModalOk').click();
+    });
+  }
+
   function syncSharedData(silent) {
     var btn = document.getElementById('syncDataBtn');
     var origText = btn ? btn.innerHTML : '';
@@ -5990,29 +6048,35 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         applySharedData(data);
         if (btn) { btn.innerHTML = '已同步'; btn.disabled = false; }
         setTimeout(function () { if (btn) btn.innerHTML = origText; }, 2000);
-        if (!silent) console.log('Data synced from GitHub');
+        if (!silent) showDataToast('数据同步完成', 'success');
       })
       .catch(function (err) {
-        console.log('Sync failed (offline?): ' + err.message);
-        if (btn) { btn.innerHTML = '离线模式'; btn.disabled = false; }
+        console.log('Sync failed: ' + err.message);
+        if (btn) { btn.innerHTML = '同步失败'; btn.disabled = false; }
         setTimeout(function () { if (btn) btn.innerHTML = origText; }, 2000);
+        if (!silent) showDataToast('同步失败：' + err.message + '（请检查网络连接）', 'error');
       });
   }
 
   function publishSharedData() {
     var token = localStorage.getItem('github_deploy_token');
     if (!token) {
-      token = prompt('请输入 GitHub Token（仅首次输入，之后自动记住）：\n\nToken 需要以下权限：\n- repo / contents: read and write\n\n创建地址：https://github.com/settings/personal-access-tokens/new');
-      if (!token || token.trim() === '') return;
-      token = token.trim();
-      localStorage.setItem('github_deploy_token', token);
+      showTokenModal(function (val) {
+        localStorage.setItem('github_deploy_token', val);
+        doPublish(val);
+      });
+      return;
     }
+    doPublish(token);
+  }
 
+  function doPublish(token) {
     var btn = document.getElementById('publishDataBtn');
     var origText = btn ? btn.innerHTML : '';
     if (btn) { btn.innerHTML = '发布中...'; btn.disabled = true; }
 
     var allData = collectAllSharedData();
+    var dataCount = Object.keys(allData).length;
     var payload = {
       version: 2,
       lastUpdated: new Date().toISOString(),
@@ -6046,15 +6110,15 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       .then(function () {
         if (btn) { btn.innerHTML = '已发布'; btn.disabled = false; }
         setTimeout(function () { if (btn) btn.innerHTML = origText; }, 3000);
-        alert('数据发布成功！\n\n所有客服下次打开页面时会自动同步最新数据。');
+        showDataToast('数据发布成功！共 ' + dataCount + ' 项数据已共享，其他客服同步后即可看到更新', 'success');
       })
       .catch(function (err) {
         if (btn) { btn.innerHTML = origText; btn.disabled = false; }
         if (err.message.indexOf('401') !== -1 || err.message.indexOf('403') !== -1) {
           localStorage.removeItem('github_deploy_token');
-          alert('Token 无效或权限不足，请重新输入。\n\n错误：' + err.message);
+          showDataToast('Token 无效或权限不足，请重新输入', 'error');
         } else {
-          alert('发布失败：' + err.message + '\n\n请检查网络连接后重试。');
+          showDataToast('发布失败：' + err.message + '（请检查网络连接）', 'error');
         }
       });
   }
