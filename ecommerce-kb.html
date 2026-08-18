@@ -2238,6 +2238,13 @@
       display: flex; align-items: center; gap: 0.3rem; border-radius: 6px; transition: all 0.2s;
     }
     .login-change-btn:hover { color: var(--dark); background: var(--bg-soft); }
+    .data-btn {
+      background: none; border: 1px solid var(--border); cursor: pointer; color: var(--muted);
+      font-size: 0.76rem; font-family: var(--font); padding: 0.3rem 0.6rem;
+      display: flex; align-items: center; gap: 0.3rem; border-radius: 6px; transition: all 0.2s;
+    }
+    .data-btn:hover { color: var(--primary); border-color: var(--primary); background: var(--bg-soft); }
+    .data-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
     /* === CS Exam === */
     .cs-exam {
@@ -2471,6 +2478,14 @@
         <a href="#simulation">知识考试</a>
       </nav>
       <div class="login-topbar-actions">
+        <button class="data-btn" id="syncDataBtn" title="从云端同步数据">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          <span>同步</span>
+        </button>
+        <button class="data-btn" id="publishDataBtn" title="发布数据到云端共享">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <span>发布</span>
+        </button>
         <button class="login-change-btn" id="changePwdBtn" title="修改密码">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           <span>修改密码</span>
