@@ -146,7 +146,7 @@
   });
 
   // ============================================================
-  // 4. Scroll Spy for Sidebar
+  // 4. Sidebar Category Click → Open New Page
   // ============================================================
   var sidebarLinks = document.querySelectorAll('.sidebar a[data-section]');
   var sections = [];
@@ -154,7 +154,71 @@
     var secId = link.getAttribute('data-section');
     var sec = document.getElementById(secId);
     if (sec) sections.push({ link: link, el: sec, id: secId });
+    link.addEventListener('click', function (e) {
+      e.preventDefault();
+      openCategoryPage(secId, link.getAttribute('data-cat-name') || secId);
+    });
   });
+
+  function openCategoryPage(secId, catName) {
+    var sec = document.getElementById(secId);
+    if (!sec) return;
+    var sectionHTML = sec.outerHTML;
+
+    var allCSS = '';
+    document.querySelectorAll('style').forEach(function (style) {
+      allCSS += style.textContent + '\n';
+    });
+
+    var html = '<!DOCTYPE html>\n<html lang="zh-CN">\n<head>\n';
+    html += '<meta charset="UTF-8">\n';
+    html += '<meta name="viewport" content="width=device-width, initial-scale=1.0">\n';
+    html += '<title>' + escapeHtml(catName) + ' - 客服知识库</title>\n';
+    html += '<style>\n';
+    html += '* { margin: 0; padding: 0; box-sizing: border-box; }\n';
+    html += 'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif; background: #f8f9fc; color: #1e293b; line-height: 1.6; }\n';
+    html += '.cat-page-header { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: #fff; padding: 1.5rem 2rem; display: flex; align-items: center; gap: 1rem; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }\n';
+    html += '.cat-page-header h1 { font-size: 1.4rem; font-weight: 700; }\n';
+    html += '.cat-page-header .back-btn { background: rgba(255,255,255,0.2); border: none; color: #fff; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 0.3rem; transition: background 0.2s; }\n';
+    html += '.cat-page-header .back-btn:hover { background: rgba(255,255,255,0.35); }\n';
+    html += '.cat-page-body { max-width: 960px; margin: 0 auto; padding: 2rem; }\n';
+    html += '.cat-page-body .kb-section { background: #fff; border-radius: 12px; padding: 2rem; box-shadow: 0 1px 4px rgba(0,0,0,0.06); margin-bottom: 1.5rem; }\n';
+    html += '.cat-page-body .section-head { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }\n';
+    html += '.cat-page-body .sec-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }\n';
+    html += '.cat-page-body .sec-icon svg { width: 24px; height: 24px; }\n';
+    html += '.cat-page-body .section-head h2 { font-size: 1.5rem; font-weight: 700; }\n';
+    html += '.cat-page-body .sec-sub { font-size: 0.85rem; color: #64748b; }\n';
+    html += '.cat-page-body .section-edit-bar { display: flex; gap: 0.5rem; margin-left: auto; }\n';
+    html += '.cat-page-body .section-edit-btn { display: none; }\n';
+    html += '.cat-page-body .section-edit-btn.export { display: inline-flex; align-items: center; gap: 0.3rem; background: #f1f5f9; border: 1px solid #e2e8f0; color: #475569; padding: 0.4rem 0.8rem; border-radius: 8px; font-size: 0.8rem; cursor: pointer; }\n';
+    html += '.cat-page-body .section-edit-btn.export:hover { background: #e2e8f0; }\n';
+    html += allCSS + '\n';
+    html += '</style>\n';
+    html += '</head>\n<body>\n';
+    html += '<div class="cat-page-header">\n';
+    html += '<button class="back-btn" onclick="window.close()">\n';
+    html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M19 12H5"/><polyline points="12 19 5 12 19 5"/></svg>\n返回\n</button>\n';
+    html += '<h1>' + escapeHtml(catName) + '</h1>\n';
+    html += '</div>\n';
+    html += '<div class="cat-page-body">\n';
+    html += sectionHTML;
+    html += '\n</div>\n';
+    html += '<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"><\/script>\n';
+    html += '<script>\n';
+    html += 'function escapeHtml(t){var d=document.createElement("div");d.textContent=t;return d.innerHTML;}\n';
+    html += 'document.querySelectorAll(".section-edit-btn.export").forEach(function(btn){btn.addEventListener("click",function(){var sec=btn.closest(".kb-section");if(!sec)return;var type=btn.getAttribute("data-export")||"section";var title=sec.querySelector("h2")?sec.querySelector("h2").textContent:type;var data={type:type,title:title,exportDate:new Date().toISOString(),sectionHTML:sec.outerHTML,text:sec.innerText};var blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="shophelp_"+type+"_"+new Date().toISOString().slice(0,10)+".json";a.click();});});\n';
+    html += '<\/script>\n';
+    html += '</body>\n</html>';
+
+    var w = window.open('', '_blank');
+    if (w) {
+      w.document.open();
+      w.document.write(html);
+      w.document.close();
+    } else {
+      alert('请允许弹出窗口以查看分类内容');
+    }
+  }
 
   function updateActiveSection() {
     var scrollPos = window.scrollY + 120;
@@ -203,62 +267,9 @@
     });
   });
 
-  // ============================================================
-  // 7. Mermaid Init
-  // ============================================================
-  if (typeof mermaid !== 'undefined') {
-    mermaid.initialize({
-      startOnLoad: true, theme: 'neutral', securityLevel: 'loose',
-      flowchart: { useMaxWidth: true, htmlLabels: true, curve: 'basis' },
-      themeVariables: {
-        primaryColor: accent + '15', primaryTextColor: ink, primaryBorderColor: accent,
-        lineColor: accent, secondaryColor: bg2, tertiaryColor: '#ffffff', fontSize: '14px'
-      }
-    });
-  }
 
   // ============================================================
-  // 8. ECharts Radar Chart
-  // ============================================================
-  if (typeof echarts !== 'undefined') {
-    var chartEl = document.getElementById('chart-service');
-    if (chartEl) {
-      var chart = echarts.init(chartEl, null, { renderer: 'svg' });
-      chart.setOption({
-        animation: false, tooltip: { trigger: 'item', appendToBody: true },
-        radar: {
-          indicator: [
-            { name: '响应速度', max: 100 }, { name: '问题解决率', max: 100 },
-            { name: '服务态度', max: 100 }, { name: '专业知识', max: 100 },
-            { name: '用户满意度', max: 100 }
-          ],
-          radius: '62%', center: ['50%', '52%'], splitNumber: 4,
-          axisName: { color: ink, fontSize: 13, fontWeight: 600 },
-          splitLine: { lineStyle: { color: rule, width: 1 } },
-          splitArea: { areaStyle: { color: ['rgba(99,102,241,0.02)', 'rgba(99,102,241,0.04)', 'rgba(99,102,241,0.06)', 'rgba(99,102,241,0.08)'] } },
-          axisLine: { lineStyle: { color: rule } }
-        },
-        series: [{
-          type: 'radar',
-          data: [{
-            value: [95, 92, 96, 94, 93], name: '服务质量评分',
-            symbol: 'circle', symbolSize: 8,
-            lineStyle: { color: accent, width: 2.5 },
-            itemStyle: { color: accent, borderColor: '#fff', borderWidth: 2 },
-            areaStyle: { color: { type: 'radial', x: 0.5, y: 0.5, r: 0.8, colorStops: [
-              { offset: 0, color: 'rgba(99,102,241,0.25)' },
-              { offset: 1, color: 'rgba(99,102,241,0.05)' }
-            ]}},
-            label: { show: true, color: ink, fontSize: 13, fontWeight: 700, formatter: function (p) { return p.value + '分'; } }
-          }]
-        }]
-      });
-      window.addEventListener('resize', function () { chart.resize(); });
-    }
-  }
-
-  // ============================================================
-  // 9. Knowledge Management (CRUD + Product/Brand + Clicks)
+  // 8. Knowledge Management (CRUD + Product/Brand + Clicks)
   // ============================================================
   var STORAGE_KEY = 'shophelp_kb_custom_entries';
   var customEntries = [];
