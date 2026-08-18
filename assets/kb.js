@@ -2308,4 +2308,150 @@
     });
   }
 
+  // ============================================================
+  // 14. Shared Data Sync (GitHub-based)
+  // ============================================================
+  var SHARED_DATA_URL = 'https://nbcx-art.github.io/ecommerce-kb/shared-data.json';
+  var GITHUB_API_URL = 'https://api.github.com/repos/nbcx-art/ecommerce-kb/contents/shared-data.json';
+  var SHARED_KEYS = [
+    'shophelp_kb_custom_entries',
+    'shophelp_kb_custom_categories',
+    'shophelp_errors_custom_entries',
+    'shophelp_errors_custom_categories',
+    'edit_常见问题',
+    'edit_退换货',
+    'edit_物流配送',
+    'edit_支付方式',
+    'edit_售后服务'
+  ];
+
+  function collectAllSharedData() {
+    var data = {};
+    SHARED_KEYS.forEach(function (key) {
+      var val = localStorage.getItem(key);
+      if (val !== null) data[key] = val;
+    });
+    Object.keys(localStorage).forEach(function (key) {
+      if (key.indexOf('custom_') === 0) {
+        data[key] = localStorage.getItem(key);
+      }
+    });
+    var pwd = localStorage.getItem('shophelp_access_password');
+    if (pwd) data['shophelp_access_password'] = pwd;
+    return data;
+  }
+
+  function applySharedData(sharedData) {
+    if (!sharedData || typeof sharedData !== 'object') return;
+    var data = sharedData.data || sharedData;
+    var merged = 0;
+    var overwritten = 0;
+    Object.keys(data).forEach(function (key) {
+      var currentVal = localStorage.getItem(key);
+      if (currentVal !== data[key]) {
+        if (currentVal !== null) overwritten++;
+        else merged++;
+        localStorage.setItem(key, data[key]);
+      }
+    });
+    if (merged > 0 || overwritten > 0) {
+      var msg = '同步完成：新增 ' + merged + ' 项';
+      if (overwritten > 0) msg += '，更新 ' + overwritten + ' 项';
+      if (typeof showToast === 'function') showToast(msg);
+      else console.log(msg);
+      if (typeof renderKbList === 'function') renderKbList();
+      if (typeof renderErrorList === 'function') renderErrorList();
+      if (typeof loadCustomEdits === 'function') loadCustomEdits();
+    }
+  }
+
+  function syncSharedData(silent) {
+    var btn = document.getElementById('syncDataBtn');
+    var origText = btn ? btn.innerHTML : '';
+    if (btn) { btn.innerHTML = '同步中...'; btn.disabled = true; }
+    fetch(SHARED_DATA_URL + '?t=' + Date.now())
+      .then(function (res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      })
+      .then(function (data) {
+        applySharedData(data);
+        if (btn) { btn.innerHTML = '已同步'; btn.disabled = false; }
+        setTimeout(function () { if (btn) btn.innerHTML = origText; }, 2000);
+        if (!silent) console.log('Data synced from GitHub');
+      })
+      .catch(function (err) {
+        console.log('Sync failed (offline?): ' + err.message);
+        if (btn) { btn.innerHTML = '离线模式'; btn.disabled = false; }
+        setTimeout(function () { if (btn) btn.innerHTML = origText; }, 2000);
+      });
+  }
+
+  function publishSharedData() {
+    var token = localStorage.getItem('github_deploy_token');
+    if (!token) {
+      token = prompt('请输入 GitHub Token（仅首次输入，之后自动记住）：\n\nToken 需要以下权限：\n- repo / contents: read and write\n\n创建地址：https://github.com/settings/personal-access-tokens/new');
+      if (!token || token.trim() === '') return;
+      token = token.trim();
+      localStorage.setItem('github_deploy_token', token);
+    }
+
+    var btn = document.getElementById('publishDataBtn');
+    var origText = btn ? btn.innerHTML : '';
+    if (btn) { btn.innerHTML = '发布中...'; btn.disabled = true; }
+
+    var allData = collectAllSharedData();
+    var payload = {
+      version: 2,
+      lastUpdated: new Date().toISOString(),
+      publishedBy: localStorage.getItem('shophelp_admin_name') || 'admin',
+      data: allData
+    };
+    var content = btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2))));
+
+    fetch(GITHUB_API_URL, {
+      method: 'GET',
+      headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json' }
+    })
+      .then(function (res) { return res.json(); })
+      .then(function (fileInfo) {
+        var body = {
+          message: 'Update shared data - ' + new Date().toLocaleString('zh-CN'),
+          content: content,
+          sha: fileInfo.sha,
+          branch: 'main'
+        };
+        return fetch(GITHUB_API_URL, {
+          method: 'PUT',
+          headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+      })
+      .then(function (res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      })
+      .then(function () {
+        if (btn) { btn.innerHTML = '已发布'; btn.disabled = false; }
+        setTimeout(function () { if (btn) btn.innerHTML = origText; }, 3000);
+        alert('数据发布成功！\n\n所有客服下次打开页面时会自动同步最新数据。');
+      })
+      .catch(function (err) {
+        if (btn) { btn.innerHTML = origText; btn.disabled = false; }
+        if (err.message.indexOf('401') !== -1 || err.message.indexOf('403') !== -1) {
+          localStorage.removeItem('github_deploy_token');
+          alert('Token 无效或权限不足，请重新输入。\n\n错误：' + err.message);
+        } else {
+          alert('发布失败：' + err.message + '\n\n请检查网络连接后重试。');
+        }
+      });
+  }
+
+  setTimeout(function () { syncSharedData(true); }, 2000);
+
+  var syncBtn = document.getElementById('syncDataBtn');
+  var publishBtn = document.getElementById('publishDataBtn');
+  if (syncBtn) syncBtn.addEventListener('click', function () { syncSharedData(false); });
+  if (publishBtn) publishBtn.addEventListener('click', publishSharedData);
+
 })();
